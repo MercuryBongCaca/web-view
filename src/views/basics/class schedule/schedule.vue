@@ -284,7 +284,4 @@ export default {
   border-radius: 4px;
   // min-height: 36px;
 }
-.bg-purple {
-  // background: #d3dce6;
-}
 </style>
