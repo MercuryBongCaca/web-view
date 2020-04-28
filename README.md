@@ -1,4 +1,4 @@
-
+```js
 ## setting.js 配置
 
 module.exports = {
