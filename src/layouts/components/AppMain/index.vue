@@ -18,9 +18,6 @@
       Copyright
       <byui-icon :icon="['fas', 'copyright']"></byui-icon>
       {{ fullYear }} 青岛市崂山区最强前端小组中的最菜组员荣誉出品
-      <br />
-      每周六在线前端授课咨询（限时限量88元起步入VIP群，有钱的多给没钱的少给，希望能帮到你也帮到我自己）
-      联系QQ1204505056
     </footer>
   </section>
 </template>

@@ -8,54 +8,63 @@
           <el-form
             :label-position="labelPosition"
             :rules="rules"
-            :model="formLabelAlign"
+            :model="baseform"
           >
             <el-col :span="8">
-              <el-form-item label="机构名称" prop="name">
-                <el-input v-model="formLabelAlign.name"></el-input>
+              <el-form-item label="代码" prop="ShopNo">
+                <el-input v-model="baseform.ShopNo"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="联系人">
-                <el-input v-model="formLabelAlign.name"></el-input>
+              <el-form-item label="机构名称" prop="ShopName">
+                <el-input v-model="baseform.ShopName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="手机号" prop="name">
-                <el-input v-model="formLabelAlign.name"></el-input>
+              <el-form-item label="电话">
+                <el-input v-model="baseform.ShopNumber"> </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="24">
               <el-form-item label="地址简介">
-                <el-input type="textarea"></el-input>
+                <el-input
+                  v-model="baseform.Uaddress"
+                  type="textarea"
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <!-- <el-col :span="8">
+              <el-form-item label="主页">
+                <el-input v-model="baseform.Indexurl">
+                  <i slot="prefix" class="el-input__icon el-icon-position"></i>
+                </el-input>
+              </el-form-item>
+            </el-col> -->
+            <el-col :span="8">
+              <el-form-item label="负责人" prop="Uname">
+                <el-input v-model="baseform.Uname"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="手机号" prop="Umobile">
+                <el-input v-model="baseform.Umobile"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="微信号">
+                <el-input v-model="baseform.WeChat"> </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="Email">
-                <el-input v-model="formLabelAlign.name">
+                <el-input v-model="baseform.Email">
                   <i slot="prefix" class="el-input__icon el-icon-message"></i>
                 </el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="主页">
-                <el-input v-model="formLabelAlign.name">
-                  <i slot="prefix" class="el-input__icon el-icon-position"></i>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="电话">
-                <el-input v-model="formLabelAlign.name"> </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="传真">
-                <el-input v-model="formLabelAlign.name"> </el-input>
-              </el-form-item>
-            </el-col>
+
             <el-col :span="24" align="right">
-              <el-button type="primary">保存 </el-button>
+              <el-button type="primary" @click="baseformSave">保存 </el-button>
             </el-col>
           </el-form>
         </el-row>
@@ -196,6 +205,7 @@
   </el-tabs>
 </template>
 <script>
+import { SaveShop } from "@/api/shop_basics";
 export default {
   name: "System",
   components: {},
@@ -214,26 +224,91 @@ export default {
         },
       ],
       rules: {
-        name: [
-          { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
+        ShopNo: [
+          {
+            required: true,
+            message: "请输入编号(用于登录,简短易记)",
+            trigger: "blur",
+          },
+          {
+            min: 3,
+            max: 30,
+            message: "长度在 3 到 30 个字符",
+            trigger: "blur",
+          },
         ],
-        resource: [
-          { required: true, message: "请选择活动资源", trigger: "change" },
+        ShopName: [
+          {
+            required: true,
+            message: "请输入名称",
+            trigger: "blur",
+          },
+          {
+            min: 3,
+            max: 30,
+            message: "长度在 3 到 30 个字符",
+            trigger: "blur",
+          },
         ],
-        desc: [{ required: true, message: "请填写活动形式", trigger: "blur" }],
+        Uname: [
+          {
+            required: true,
+            message: "请输入负责人",
+            trigger: "blur",
+          },
+          {
+            min: 3,
+            max: 30,
+            message: "长度在 3 到 30 个字符",
+            trigger: "blur",
+          },
+        ],
+        Umobile: [
+          {
+            required: true,
+            message: "请输入负责人手机号",
+            trigger: "blur",
+          },
+          {
+            min: 3,
+            max: 30,
+            message: "长度在 3 到 30 个字符",
+            trigger: "blur",
+          },
+        ],
       },
       labelPosition: "top",
-      formLabelAlign: {
-        name: "",
-        region: "",
-        type: "",
+      baseform: {
+        ShopID: "",
+        ShopNo: "",
+        ShopName: "",
+        Uname: "",
+        Umobile: "",
+        ShopNumber: "",
+        WeChat: "",
+        Email: "",
+        Uaddress: "",
+        IndexUrl: "",
+        UID: "",
+        BeginTime: "",
+        EndTime: "",
+        Status: "",
+        IsDeleted: "",
+        upTime: "",
+        upUser: "",
       },
       activeName: "first",
     };
   },
   created() {},
   methods: {
+    baseformSave() {
+      this.$baseMessage("保存成功！", "success");
+      //调用API  import { SaveShop } from "@/api/shop_basics";
+      SaveShop(this.baseform).then((res) => {
+        console.log(res);
+      });
+    },
     handleClick(tab, event) {
       console.log(tab, event);
     },
@@ -244,5 +319,6 @@ export default {
 .box-card {
   width: 100%;
   height: 70vh;
+  min-height: 500px;
 }
 </style>
