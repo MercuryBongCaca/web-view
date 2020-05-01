@@ -1,100 +1,183 @@
 <template>
   <div class="table-container">
-    <byui-query-form>
-      <el-form
-        ref="form"
-        :model="queryForm"
-        :inline="true"
-        @submit.native.prevent
-      >
-        <el-form-item>
-          <el-input v-model="queryForm.title" placeholder="标题" />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            icon="el-icon-search"
-            type="primary"
-            native-type="submit"
-            @click="handleQuery"
-            >查询
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </byui-query-form>
-    <div style="text-align: right; padding-bottom: 10px;">
-      <el-button icon="el-icon-plus" type="primary" @click="handleAdd"
-        >添加
-      </el-button>
-      <el-button icon="el-icon-delete" type="danger" @click="handleDelete"
-        >删除
-      </el-button>
-      <el-button v-if="checkPermission(['超级管理员'])" type="primary"
-        >按钮级权限
-      </el-button>
-    </div>
-    <el-table
-      ref="tableSort"
-      v-loading="listLoading"
-      :data="list"
-      :element-loading-text="elementLoadingText"
-      :height="height"
-      @selection-change="setSelectRows"
-      @sort-change="tableSortChange"
-    >
-      <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column label="课程图片" width="80">
-        <template slot-scope="scope">
-          <div style="width: 80px; height: 50px;">
-            <el-image
-              v-if="imgShow"
-              :preview-src-list="imageList"
-              :src="scope.row.img"
-              style="width: 80px; height: 50px;"
-            ></el-image>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="课程名称" prop="author"></el-table-column>
-      <el-table-column
-        label="收费方式"
-        prop="sex"
-        width="110"
-      ></el-table-column>
-      <el-table-column label="天/节" prop="sex" width="110"></el-table-column>
-      <el-table-column label="价格" prop="age" width="110"></el-table-column>
-      <el-table-column class-name="status-col" label="售卖状态" width="110">
-        <template slot-scope="scope">
-          <el-tooltip
-            :content="scope.row.status"
-            class="item"
-            effect="dark"
-            placement="top-start"
+    <el-tabs v-model="activeName" class="system_tabs" @tab-click="handleClick">
+      <el-tab-pane label="课程设定" name="first">
+        <byui-query-form>
+          <el-form
+            ref="form"
+            :model="courseQueryForm"
+            :inline="true"
+            @submit.native.prevent
           >
-            <el-tag :type="scope.row.status | statusFilter"
-              >{{ scope.row.status }}
-            </el-tag>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="操作">
-        <template slot-scope="scope">
-          <el-button type="text" @click="handleEdit(scope.row)"
-            >编辑
+            <el-form-item>
+              <el-input v-model="courseQueryForm.name" placeholder="课程名称" />
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                icon="el-icon-search"
+                type="primary"
+                native-type="submit"
+                @click="courseQuery"
+                >查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </byui-query-form>
+        <div style="text-align: right; padding-bottom: 10px;">
+          <el-button icon="el-icon-plus" type="primary" @click="courseAdd"
+            >添加
           </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      :background="background"
-      :current-page="queryForm.pageNo"
-      :layout="layout"
-      :page-size="queryForm.pageSize"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-    ></el-pagination>
-    <edit ref="edit"></edit>
+          <el-button icon="el-icon-delete" type="danger" @click="courseDelete"
+            >删除
+          </el-button>
+        </div>
+        <el-table
+          ref="tableSort"
+          v-loading="listLoading"
+          :data="courseList"
+          :element-loading-text="elementLoadingText"
+          :height="height"
+          @selection-change="setSelectRows"
+          @sort-change="tableSortChange"
+        >
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column label="课程图片" width="80">
+            <template slot-scope="scope">
+              <div style="width: 80px; height: 50px;">
+                <el-image
+                  v-if="imgShow"
+                  :preview-src-list="[scope.row.imgURL]"
+                  :src="scope.row.imgURL"
+                  style="width: 80px; height: 50px;"
+                ></el-image>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="课程名称" prop="Name"></el-table-column>
+          <el-table-column
+            label="课程类型"
+            prop="TypeName"
+            width="110"
+          ></el-table-column>
+          <el-table-column
+            label="时长"
+            prop="Min"
+            width="110"
+          ></el-table-column>
+          <el-table-column class-name="status-col" label="售卖状态" width="110">
+            <template slot-scope="scope">
+              <el-tag :type="scope.row.Status | statusFilter"
+                >{{ scope.row.StatusName }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button type="text" @click="courseEdit(scope.row)"
+                >编辑
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          :background="background"
+          :current-page="courseQueryForm.pageNo"
+          :layout="layout"
+          :page-size="courseQueryForm.pageSize"
+          :total="total"
+          @current-change="courseCurrentChange"
+          @size-change="courseSizeChange"
+        ></el-pagination>
+        <edit ref="edit"></edit>
+      </el-tab-pane>
+      <el-tab-pane label="价格设定" name="second">
+        <byui-query-form>
+          <el-form
+            ref="form"
+            :model="priceQueryForm"
+            :inline="true"
+            @submit.native.prevent
+          >
+            <el-form-item>
+              <el-input v-model="priceQueryForm.name" placeholder="课程名称" />
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                icon="el-icon-search"
+                type="primary"
+                native-type="submit"
+                @click="priceQuery"
+                >查询
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </byui-query-form>
+        <div style="text-align: right; padding-bottom: 10px;">
+          <el-button icon="el-icon-plus" type="primary" @click="priceAdd"
+            >添加
+          </el-button>
+          <el-button icon="el-icon-delete" type="danger" @click="courseDelete"
+            >删除
+          </el-button>
+        </div>
+        <el-table
+          ref="tableSort"
+          v-loading="listLoading"
+          :data="coursePriceList"
+          :element-loading-text="elementLoadingText"
+          :height="height"
+          @selection-change="setSelectPriceRows"
+        >
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column label="课程图片" width="80">
+            <template slot-scope="scope">
+              <div style="width: 80px; height: 50px;">
+                <el-image
+                  v-if="imgShow"
+                  :preview-src-list="[scope.row.imgURL]"
+                  :src="scope.row.imgURL"
+                  style="width: 80px; height: 50px;"
+                ></el-image>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="课程名称" prop="CourseName"></el-table-column>
+          <el-table-column
+            label="课程类型"
+            prop="CourseTypeName"
+            width="110"
+          ></el-table-column>
+          <el-table-column
+            label="课程单价"
+            prop="Price"
+            width="110"
+          ></el-table-column>
+          <el-table-column label="数量" width="200">
+            <template slot-scope="scope">
+              {{ scope.row.Num1 + "-" + scope.row.Num2 }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button type="text" @click="priceEdit(scope.row)"
+                >编辑
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          :background="background"
+          :current-page="priceQueryForm.pageNo"
+          :layout="layout"
+          :page-size="priceQueryForm.pageSize"
+          :total="total"
+          @current-change="priceCurrentChange"
+          @size-change="priceSizeChange"
+        ></el-pagination>
+        <price-edit ref="priceedit"></price-edit>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
@@ -102,43 +185,87 @@
 import checkPermission from "@/utils/permission";
 import { getList } from "@/api/table";
 import Edit from "./components/edit";
+import PriceEdit from "./components/priceEdit";
 
 export default {
   name: "Table",
   components: {
     Edit,
+    PriceEdit,
   },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: "success",
-        draft: "gray",
-        deleted: "danger",
+        "1": "success",
+        "2": "gray",
+        "3": "danger",
       };
       return statusMap[status];
     },
   },
   data() {
     return {
+      activeName: "first",
+      courseList: [
+        {
+          CourseID: "C1",
+          Name: "吉他初级",
+          Type: "1",
+          TypeName: "吉他",
+          Min: "30",
+          Remark: "",
+          Status: "1",
+          StatusName: "售卖",
+          ShopID: "",
+          IsDeleted: "",
+          upTime: "",
+          upUser: "",
+          imgURL:
+            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
+        },
+      ],
+      coursePriceList: [
+        {
+          CourseName: "吉他初级",
+          CourseTypeName: "乐器",
+          CoursePriceID: "c1",
+          CourseID: "d1",
+          Type: "1",
+          Num1: "1",
+          Num2: "100",
+          Price: "60",
+          ShopID: "",
+          IsDeleted: "",
+          upTime: "",
+          upUser: "",
+          imgURL:
+            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
+        },
+      ],
       imgShow: true,
       list: [],
       imageList: [],
-      listLoading: true,
+      listLoading: false,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
       background: true,
       height: 0,
       selectRows: "",
+      selectPriceRows: "",
       elementLoadingText: "正在加载...",
-      queryForm: {
+      courseQueryForm: {
         pageNo: 1,
         pageSize: 10,
-        title: "",
+        name: "",
+      },
+      priceQueryForm: {
+        pageNo: 1,
+        pageSize: 10,
+        name: "",
       },
     };
   },
   created() {
-    this.fetchData();
     this.height = this.$baseTableHeight(1);
   },
   beforeDestroy() {
@@ -164,13 +291,22 @@ export default {
     setSelectRows(val) {
       this.selectRows = val;
     },
-    handleAdd() {
+    setSelectPriceRows(val) {
+      this.selectPriceRows = val;
+    },
+    courseAdd() {
       this.$refs["edit"].showEdit();
     },
-    handleEdit(row) {
+    courseEdit(row) {
       this.$refs["edit"].showEdit(row);
     },
-    handleDelete() {
+    priceAdd() {
+      this.$refs["priceedit"].showPriceEdit();
+    },
+    priceEdit(row) {
+      this.$refs["priceedit"].showPriceEdit(row);
+    },
+    courseDelete() {
       if (this.selectRows.length === 0) {
         return this.$baseMessage("请至少选择一项", "error");
       }
@@ -186,32 +322,23 @@ export default {
         }
       );
     },
-    handleSizeChange(val) {
-      this.queryForm.pageSize = val;
-      this.fetchData();
+    courseSizeChange(val) {
+      this.courseQueryForm.pageSize = val;
     },
-    handleCurrentChange(val) {
-      this.queryForm.pageNo = val;
-      this.fetchData();
+    courseCurrentChange(val) {
+      this.courseQueryForm.pageNo = val;
     },
-    handleQuery() {
-      this.queryForm.pageNo = 1;
-      this.fetchData();
+    courseQuery() {
+      this.courseQueryForm.pageNo = 1;
     },
-    fetchData() {
-      this.listLoading = true;
-      getList(this.queryForm).then((res) => {
-        this.list = res.data;
-        const imageList = [];
-        res.data.forEach((item, index) => {
-          imageList.push(item.img);
-        });
-        this.imageList = imageList;
-        this.total = res.totalCount;
-        setTimeout(() => {
-          this.listLoading = false;
-        }, 500);
-      });
+    priceSizeChange(val) {
+      this.priceQueryForm.pageSize = val;
+    },
+    priceCurrentChange(val) {
+      this.priceQueryForm.pageNo = val;
+    },
+    priceQuery() {
+      this.priceQueryForm.pageNo = 1;
     },
     checkPermission,
   },

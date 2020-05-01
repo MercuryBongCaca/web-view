@@ -6,10 +6,7 @@
     @close="close"
   >
     <el-form :model="courseForm" label-width="100px">
-      <el-form-item label="名称">
-        <el-input v-model="courseForm.Name" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="课程类型">
+      <el-form-item label="课程名称">
         <el-select
           v-model="courseForm.Type"
           style="width: 100%;"
@@ -19,41 +16,33 @@
           <el-option label="架子鼓" value="2"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="课程时长">
-        <el-input v-model="courseForm.Min" autocomplete="off">
-          <template slot="append">分钟</template>
+      <el-form-item label="计费方式">
+        <el-radio v-model="priceType" label="1">按节</el-radio>
+        <el-radio v-model="priceType" label="2">按天</el-radio>
+      </el-form-item>
+      <el-form-item label="数量区间">
+        <el-input
+          v-model="courseForm.Min"
+          autocomplete="off"
+          style="width: 80px;"
+        >
+        </el-input
+        >至
+        <el-input
+          v-model="courseForm.Min"
+          autocomplete="off"
+          style="width: 80px;"
+        >
         </el-input>
+        {{ priceType == "1" ? "节" : "天" }}
       </el-form-item>
-      <el-form-item label="状态">
-        <el-select
-          v-model="courseForm.Status"
-          style="width: 100%;"
-          placeholder="请选择状态"
-        >
-          <el-option label="售卖" value="1"></el-option>
-          <el-option label="展示" value="2"></el-option>
-          <el-option label="禁售" value="3"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="图片上传">
-        <el-upload
-          action="https://jsonplaceholder.typicode.com/posts/"
-          list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove"
-          :limit="1"
-        >
-          <i class="el-icon-plus"></i>
-          <div slot="tip" class="el-upload__tip">
-            只能上传1张,如需修改请删除后上传。
-          </div>
-        </el-upload>
+      <el-form-item label="课程单价">
+        <el-input v-model="courseForm.Min" autocomplete="off"> </el-input>
       </el-form-item>
     </el-form>
-
-    <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="dialogImageUrl" alt="" />
-    </el-dialog>
+    <div class="div_msg">
+      *购买课程时如出现区间一样的设定，默认按最高单价计算
+    </div>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
       <el-button type="primary" @click="save">确 定</el-button>
@@ -63,19 +52,15 @@
 
 <script>
 export default {
-  name: "TableEdit",
+  name: "PriceEdit",
   data() {
     return {
+      priceType: "1",
       dialogImageUrl: "",
       dialogVisible: false,
       dialogWidth: "340px",
       courseForm: {},
-      fileList: [
-        {
-          url:
-            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
-        },
-      ],
+
       title: "",
       dialogFormVisible: false,
     };
@@ -91,12 +76,12 @@ export default {
     };
   },
   methods: {
-    showEdit(row) {
+    showPriceEdit(row) {
       if (!row) {
-        this.title = "增加课程";
+        this.title = "价格设定";
         this.courseForm = {};
       } else {
-        this.title = "编辑课程";
+        this.title = "价格设定";
         this.courseForm = JSON.parse(JSON.stringify(row));
       }
       this.dialogFormVisible = true;
@@ -108,13 +93,6 @@ export default {
     save() {
       console.log(this.courseForm);
       this.dialogFormVisible = false;
-    },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
     },
     setDialogWidth() {
       console.log(document.body.clientWidth);
