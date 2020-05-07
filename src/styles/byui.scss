@@ -81,7 +81,21 @@ a {
   color: #17a2b8;
 }
 html {
-  
+  //zq_class
+  .zq_gray {
+    color: #606266;
+  }
+  .zq_m_r {
+    margin-right: 8px;
+  }
+  .zq_m_c {
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+  .zq_p_10 {
+    padding: 10px;
+  }
+  //zq_class end
   .system_tabs {
     padding: 20px;
   }

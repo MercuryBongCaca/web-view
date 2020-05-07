@@ -5,40 +5,40 @@
     width="370px"
     @close="close"
   >
-    <el-form :model="form" label-width="80px">
-      <el-form-item label="场地" prop="region">
-        <el-select v-model="form.area" placeholder="请选择场地">
+    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form-item label="场地" prop="AreaID">
+        <el-select v-model="form.AreaID" placeholder="请选择场地">
           <el-option
             v-for="(item, index) in areaList"
             :key="index"
-            :label="item.name"
-            :value="item.id"
+            :label="item.Name"
+            :value="item.AreaID"
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="课程" prop="region">
-        <el-select v-model="form.course" placeholder="请选择课程">
+      <el-form-item label="课程" prop="CourseID">
+        <el-select v-model="form.CourseID" placeholder="请选择课程">
           <el-option
             v-for="(item, index) in courseList"
             :key="index"
-            :label="item.name + '(' + item.minute + '分钟)'"
-            :value="item.id"
+            :label="item.Name + '(' + item.Min + '分钟)'"
+            :value="item.CourseID"
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="老师" prop="region">
-        <el-select v-model="form.teacher" placeholder="请选择老师">
+      <el-form-item label="老师" prop="EmployeeID">
+        <el-select v-model="form.EmployeeID" placeholder="请选择老师">
           <el-option
             v-for="(item, index) in employeeList"
             :key="index"
-            :label="item.name"
-            :value="item.id"
+            :label="item.Name"
+            :value="item.EmployeeID"
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="开始">
+      <el-form-item label="开始" prop="StartTime">
         <el-time-picker
-          v-model="form.start"
+          v-model="form.StartTime"
           style="width: 100%; max-width: 190px;"
           format="HH:mm"
           value-format="HH:mm"
@@ -50,9 +50,9 @@
         >
         </el-time-picker>
       </el-form-item>
-      <el-form-item label="结束">
+      <el-form-item label="结束" prop="EndTime">
         <el-time-picker
-          v-model="form.end"
+          v-model="form.EndTime"
           style="width: 100%; max-width: 190px;"
           format="HH:mm"
           value-format="HH:mm"
@@ -70,7 +70,7 @@
     </div>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="save">确 定</el-button>
+      <el-button type="primary" @click="save('form')">确 定</el-button>
     </div>
   </el-dialog>
 </template>
@@ -81,24 +81,63 @@ export default {
   name: "ScheduleEdit",
   data() {
     return {
-      form: {
-        start: "10:10",
-        end: "11:10",
-        area: "1",
-        course: "1",
-        teacher: "1",
-        diff: 60,
-      },
+      form: {},
       listIndex: 0,
       cIndex: 0,
       title: "",
       dialogFormVisible: false,
+      rules: {
+        AreaID: [
+          {
+            required: true,
+            message: "请选择场地",
+            trigger: "change",
+          },
+        ],
+        CourseID: [
+          {
+            required: true,
+            message: "请选择课程",
+            trigger: "change",
+          },
+        ],
+        EmployeeID: [
+          {
+            required: true,
+            message: "请选择老师",
+            trigger: "change",
+          },
+        ],
+        StartTime: [
+          {
+            required: true,
+            message: "请选择开始时间",
+            trigger: "change",
+          },
+        ],
+        EndTime: [
+          {
+            required: true,
+            message: "请选择结束时间",
+            trigger: "change",
+          },
+        ],
+      },
     };
   },
   computed: {
     ...mapGetters(["employeeList", "areaList", "courseList"]),
   },
-  created() {},
+  created() {
+    this.form = {
+      StartTime: "",
+      EndTime: "",
+      AreaID: "",
+      CourseID: "",
+      EmployeeID: "",
+      diff: 0,
+    };
+  },
   methods: {
     showEdit(index, rowName, cindex, row) {
       this.listIndex = index;
@@ -112,30 +151,40 @@ export default {
       this.dialogFormVisible = true;
     },
     timeDifference() {
-      let startTime = this.form.start;
-      let endTime = this.form.end;
-      let start1 = startTime.split(":");
-      let startAll = parseInt(start1[0] * 60) + parseInt(start1[1]);
+      if (this.form.StartTime && this.form.EndTime) {
+        let startTime = this.form.StartTime;
+        let endTime = this.form.EndTime;
+        let start1 = startTime.split(":");
+        let startAll = parseInt(start1[0] * 60) + parseInt(start1[1]);
 
-      let end1 = endTime.split(":");
-      let endAll = parseInt(end1[0] * 60) + parseInt(end1[1]);
-      this.form.diff = endAll - startAll;
+        let end1 = endTime.split(":");
+        let endAll = parseInt(end1[0] * 60) + parseInt(end1[1]);
+        this.form.diff = endAll - startAll;
+      }
     },
     close() {
-      this.form = this.$options.data().form;
+      this.$refs["form"].resetFields();
       this.dialogFormVisible = false;
     },
-    save() {
-      if (this.form.diff < 0) {
-        return this.$baseMessage("时长不能小于0", "error");
-      }
-      this.dialogFormVisible = false;
-      this.$emit(
-        "transferUser",
-        this.listIndex,
-        JSON.parse(JSON.stringify(this.form)),
-        this.cIndex
-      );
+    save(formName) {
+      let self = this;
+      self.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (self.form.diff < 0) {
+            return self.$baseMessage("时长不能小于0", "error");
+          }
+          self.dialogFormVisible = false;
+          self.$emit(
+            "transferUser",
+            self.listIndex,
+            JSON.parse(JSON.stringify(self.form)),
+            self.cIndex
+          );
+          self.$refs[formName].resetFields();
+        } else {
+          return false;
+        }
+      });
     },
   },
 };

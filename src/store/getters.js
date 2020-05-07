@@ -14,4 +14,7 @@ export default {
   srcTableCode: (state) => state.table.srcCode,
   tagsView: (state) => state.settings.tagsView,
   visitedViews: (state) => state.tagsView.visitedViews,
+  employeeList: (state) => state.baseData.employeeList,
+  courseList: (state) => state.baseData.courseList,
+  areaList: (state) => state.baseData.areaList,
 };
