@@ -1,26 +1,40 @@
 <template>
   <div class="table-container">
-    <byui-query-form>
-      <el-form
-        ref="form"
-        :model="queryForm"
-        :inline="true"
-        @submit.native.prevent
-      >
-        <el-form-item>
-          <el-input v-model="queryForm.title" placeholder="商品名称" />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            icon="el-icon-search"
-            type="primary"
-            native-type="submit"
-            @click="handleQuery"
-            >查询
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </byui-query-form>
+    <el-form
+      ref="form"
+      :model="queryForm"
+      :inline="true"
+      @submit.native.prevent
+    >
+      <el-form-item>
+        <el-select v-model="queryForm.status" style="width: 100%;">
+          <el-option label="职位" value="0"></el-option>
+          <el-option label="店长" value="1"></el-option>
+          <el-option label="吉他老师" value="2"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="queryForm.status" style="width: 100%;">
+          <el-option label="在职状态" value="0"></el-option>
+          <el-option label="在职" value="1"></el-option>
+          <el-option label="离职" value="2"></el-option>
+          <el-option label="实习" value="3"></el-option>
+          <el-option label="兼职" value="4"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-input v-model="queryForm.name" placeholder="姓名/手机号" />
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          icon="el-icon-search"
+          type="primary"
+          native-type="submit"
+          @click="handleQuery"
+          >查询
+        </el-button>
+      </el-form-item>
+    </el-form>
     <div style="text-align: right; padding-bottom: 10px;">
       <el-button icon="el-icon-plus" type="primary" @click="handleAdd"
         >添加
@@ -28,22 +42,20 @@
       <el-button icon="el-icon-delete" type="danger" @click="handleDelete"
         >删除
       </el-button>
-      <el-button v-if="checkPermission(['超级管理员'])" type="primary"
-        >按钮级权限
-      </el-button>
     </div>
     <el-table
       ref="tableSort"
       v-loading="listLoading"
-      :data="goodsList"
+      :data="employeeList"
       :element-loading-text="elementLoadingText"
       :height="height"
       @selection-change="setSelectRows"
     >
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column label="商品图片" width="80">
+
+      <el-table-column label="头像" width="100">
         <template slot-scope="scope">
-          <div style="width: 80px; height: 50px;">
+          <div style="width: 50px; height: 50px;">
             <el-image
               v-if="imgShow"
               :preview-src-list="[scope.row.imgURL]"
@@ -53,11 +65,23 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="商品名称" prop="Name"></el-table-column>
-      <el-table-column label="类型" prop="TypeName"></el-table-column>
-      <el-table-column label="库存" prop="Number"></el-table-column>
-      <el-table-column label="销售单价" prop="SalePrice"></el-table-column>
-      <el-table-column class-name="status-col" label="状态">
+      <el-table-column label="姓名" prop="Name" width="110"></el-table-column>
+      <el-table-column
+        label="性别"
+        prop="SexName"
+        width="110"
+      ></el-table-column>
+      <el-table-column
+        label="职位"
+        prop="RolesName"
+        width="110"
+      ></el-table-column>
+      <el-table-column
+        label="手机号"
+        prop="Mobile"
+        width="110"
+      ></el-table-column>
+      <el-table-column class-name="status-col" label="员工状态" width="110">
         <template slot-scope="scope">
           <el-tooltip
             :content="scope.row.status"
@@ -71,14 +95,15 @@
           </el-tooltip>
         </template>
       </el-table-column>
-
-      <el-table-column label="操作" width="210">
+      <el-table-column
+        label="入职日期"
+        prop="EntryDate"
+        width="200"
+      ></el-table-column>
+      <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button type="text" @click="handleEdit(scope.row)"
             >编辑
-          </el-button>
-          <el-button type="text" @click="inventoryEdit(scope.row)"
-            >库存
           </el-button>
         </template>
       </el-table-column>
@@ -93,20 +118,18 @@
       @size-change="handleSizeChange"
     ></el-pagination>
     <edit ref="edit"></edit>
-    <inventory ref="iedit"></inventory>
   </div>
 </template>
 
 <script>
 import checkPermission from "@/utils/permission";
+import { getList } from "@/api/table";
 import Edit from "./components/edit";
-import Inventory from "./components/inventory";
 
 export default {
   name: "Table",
   components: {
     Edit,
-    Inventory,
   },
   filters: {
     statusFilter(status) {
@@ -121,7 +144,6 @@ export default {
   data() {
     return {
       imgShow: true,
-      imageList: [],
       listLoading: true,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
@@ -132,23 +154,26 @@ export default {
       queryForm: {
         pageNo: 1,
         pageSize: 10,
-        title: "",
+        name: "",
+        status: "0",
       },
-      goodsList: [
+      employeeList: [
         {
-          GoodsID: "",
-          Name: "红牛",
-          Unit: "瓶",
-          CostPrice: "1.5",
-          SalePrice: "2.5",
-          Type: "1",
-          TypeName: "饮料",
-          Number: "99",
-          Remark: "",
-          Status: "1",
-          StatusName: "售卖",
+          EmployeeID: "",
+          Name: "张三",
+          Sex: "1",
+          SexName: "男",
+          Roles: "1",
+          RolesName: "吉他老师",
+          Mobile: "13035961201",
+          Remark: "备注aaa",
+          LoginName: "admin",
+          PassWord: "11",
           ShopID: "",
           IsDeleted: "",
+          Status: "1",
+          StatusName: "在职",
+          EntryDate: "2020-1-12",
           upTime: "",
           upUser: "",
           imgURL:
@@ -164,15 +189,7 @@ export default {
   beforeDestroy() {
     $("body").off("click");
   },
-  mounted() {
-    //修复大图查看器存在的bug
-    $("body").on("click", ".el-image-viewer__close", () => {
-      this.imgShow = false;
-      setTimeout(() => {
-        this.imgShow = true;
-      }, 0);
-    });
-  },
+  mounted() {},
   methods: {
     setSelectRows(val) {
       this.selectRows = val;
@@ -182,9 +199,6 @@ export default {
     },
     handleEdit(row) {
       this.$refs["edit"].showEdit(row);
-    },
-    inventoryEdit(row) {
-      this.$refs["iedit"].showEdit(row);
     },
     handleDelete() {
       if (this.selectRows.length === 0) {
@@ -216,7 +230,6 @@ export default {
     },
     fetchData() {
       this.listLoading = true;
-      //获取数据后 加载动画取消
       this.listLoading = false;
     },
     checkPermission,

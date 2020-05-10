@@ -78,6 +78,38 @@ export const asyncRoutes = [
     ],
   },
   {
+    path: "/control",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/employee",
+        name: "Employee",
+        component: () => import("@/views/control/employee/employee"),
+        meta: {
+          title: "员工管理",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
+    path: "/control",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/member",
+        name: "Member",
+        component: () => import("@/views/control/member/member"),
+        meta: {
+          title: "会员管理",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
     path: "/test",
     component: Layout,
     redirect: "noRedirect",

@@ -5,52 +5,88 @@
     :width="dialogWidth"
     @close="close"
   >
-    <el-form :model="form" label-width="80px">
-      <el-form-item label="名称">
-        <el-input v-model="form.Name" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="售卖类型">
-        <el-select
-          v-model="form.ShopType"
-          style="width: 100%;"
-          placeholder="请选择活动区域"
-        >
-          <el-option label="按天" value="1"></el-option>
-          <el-option label="按节" value="2"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="数量">
-        <el-input v-model="form.Number" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="价格">
-        <el-input v-model="form.Price" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="状态">
-        <el-select
-          v-model="form.Status"
-          style="width: 100%;"
-          placeholder="请选择状态"
-        >
-          <el-option label="售卖" value="1"></el-option>
-          <el-option label="展示" value="2"></el-option>
-          <el-option label="禁售" value="3"></el-option>
-        </el-select>
-      </el-form-item>
-    </el-form>
-    <el-upload
-      class="upload-demo"
-      action="https://jsonplaceholder.typicode.com/posts/"
-      :on-preview="handlePreview"
-      :on-remove="handleRemove"
-      :file-list="fileList"
-      :limit="1"
-      list-type="picture"
-    >
-      <el-button size="small" type="primary">上传课程图片</el-button>
-      <div slot="tip" class="el-upload__tip">
-        只能上传1张,如需修改请删除后上传。
-      </div>
-    </el-upload>
+    <el-row :gutter="20">
+      <el-form :rules="goodsRules" :model="form" label-width="auto">
+        <el-col :span="12">
+          <el-form-item label="商品类型">
+            <el-select
+              v-model="form.Type"
+              style="width: 100%;"
+              placeholder="请选择类型"
+            >
+              <el-option label="饮料" value="1"></el-option>
+              <el-option label="乐器" value="2"></el-option>
+              <el-option label="书籍" value="3"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="售卖状态">
+            <el-select
+              v-model="form.Status"
+              style="width: 100%;"
+              placeholder="请选择状态"
+            >
+              <el-option label="售卖" value="1"></el-option>
+              <el-option label="展示" value="2"></el-option>
+              <el-option label="禁售" value="3"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="15">
+          <el-form-item label="商品名" prop="Name">
+            <el-input v-model="form.Name"></el-input>
+          </el-form-item> </el-col
+        ><el-col :span="9">
+          <el-form-item label="单位">
+            <el-input
+              v-model="form.Price"
+              placeholder="件"
+              maxlength="3"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="12">
+          <el-form-item label="成本价">
+            <el-input v-model="form.CostPrice">
+              <template slot="append">元</template></el-input
+            >
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="售卖价">
+            <el-input v-model="form.SalePrice"
+              ><template slot="append">元</template></el-input
+            >
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="24">
+          <el-form-item label="备注">
+            <el-input v-model="form.Remark" type="textarea"></el-input>
+          </el-form-item>
+
+          <el-form-item label="图片上传">
+            <el-upload
+              action="https://jsonplaceholder.typicode.com/posts/"
+              list-type="picture-card"
+              :on-preview="handlePictureCardPreview"
+              :on-remove="handleRemove"
+              :limit="1"
+            >
+              <i class="el-icon-plus"></i>
+              <div slot="tip" class="el-upload__tip">
+                只能上传1张,如需修改请删除后上传。
+              </div>
+            </el-upload>
+          </el-form-item>
+        </el-col>
+      </el-form>
+    </el-row>
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt="" />
+    </el-dialog>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
       <el-button type="primary" @click="save">确 定</el-button>
@@ -63,24 +99,35 @@ export default {
   name: "TableEdit",
   data() {
     return {
+      dialogImageUrl: "",
+      dialogVisible: false,
       dialogWidth: "340px",
       form: {
         GoodsID: null,
         Name: "",
-        ShopType: "1",
-        Number: "",
-        Price: "",
+        Unit: "",
+        CostPrice: "1",
+        SalePrice: "",
+        Type: "1",
         Status: "1",
       },
       fileList: [
         {
-          name: "food.jpeg",
           url:
             "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
         },
       ],
       title: "",
       dialogFormVisible: false,
+      goodsRules: {
+        Name: [
+          {
+            required: true,
+            message: "请输入商品名称",
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
 
@@ -97,9 +144,9 @@ export default {
   methods: {
     showEdit(row) {
       if (!row) {
-        this.title = "增加课程";
+        this.title = "增加商品";
       } else {
-        this.title = "编辑课程";
+        this.title = "编辑商品";
         this.form = row;
       }
       this.dialogFormVisible = true;
@@ -115,8 +162,9 @@ export default {
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
-    handlePreview(file) {
-      console.log(file);
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
     setDialogWidth() {
       console.log(document.body.clientWidth);
