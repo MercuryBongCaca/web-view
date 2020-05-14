@@ -66,7 +66,7 @@ export const asyncRoutes = [
       {
         path: "schedule",
         name: "Schedule",
-        component: () => import("@/views/basics/class schedule/schedule"),
+        component: () => import("@/views/basics/schedule/schedule"),
         meta: { title: "课表设定" },
       },
       {
