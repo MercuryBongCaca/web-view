@@ -110,6 +110,22 @@ export const asyncRoutes = [
     ],
   },
   {
+    path: "/control",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/contract",
+        name: "Contract",
+        component: () => import("@/views/control/contract/contract"),
+        meta: {
+          title: "合同管理",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
     path: "/test",
     component: Layout,
     redirect: "noRedirect",
