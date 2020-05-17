@@ -6,9 +6,9 @@
     @close="close"
   >
     <el-tabs :tab-position="tabPosition" style="min-height: 350px;">
-      <el-tab-pane label="学员选择">
+      <el-tab-pane label="会员选择">
         <el-divider content-position="left">
-          <h4>选择合同办理学员</h4></el-divider
+          <h4>选择合同办理会员</h4></el-divider
         >
         <el-row :gutter="24" style="padding-bottom: 20px;">
           <el-col :span="13">
@@ -29,11 +29,11 @@
               v-loading="listLoading"
               :data="list"
               :element-loading-text="elementLoadingText"
-              height="250"
+              height="180"
+              highlight-current-row
               @selection-change="setSelectRows"
               @sort-change="tableSortChange"
             >
-              <el-table-column type="selection" width="55"></el-table-column>
               <el-table-column label="头像" width="100">
                 <template slot-scope="scope">
                   <div style="width: 50px; height: 50px;">
@@ -53,13 +53,34 @@
               ></el-table-column> </el-table
           ></el-col>
         </el-row>
+
+        <el-divider content-position="left"> <h4>已选会员信息</h4></el-divider>
+
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <el-form label-width="auto">
+              <el-row :gutter="24">
+                <el-col :span="12">
+                  <el-form-item label="姓名">
+                    <el-input :disabled="true" autocomplete="off"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="手机号">
+                    <el-input :disabled="true" autocomplete="off"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </el-col>
+        </el-row>
       </el-tab-pane>
-      <el-tab-pane label="合同信息">
+      <el-tab-pane label="合同信息" :disabled="true">
         <el-divider content-position="left"> <h4>合同基本信息</h4></el-divider>
         <el-form label-width="80px">
           <el-row :gutter="24">
             <el-col :span="12">
-              <el-form-item label="学员姓名">
+              <el-form-item label="会员姓名">
                 <el-input :disabled="true" autocomplete="off"></el-input>
               </el-form-item>
             </el-col>
@@ -147,7 +168,7 @@
           </el-row>
         </el-form>
       </el-tab-pane>
-      <el-tab-pane label="付款记录">
+      <el-tab-pane v-if="false" label="付款记录">
         <el-divider content-position="left"> <h4>合同收费记录</h4></el-divider>
         <el-timeline>
           <el-timeline-item
@@ -163,7 +184,7 @@
           </el-timeline-item>
         </el-timeline>
       </el-tab-pane>
-      <el-tab-pane label="变更记录">
+      <el-tab-pane v-if="false" label="变更记录">
         <el-divider content-position="left"> <h4>合同更改记录</h4></el-divider>
         <el-timeline>
           <el-timeline-item
@@ -183,7 +204,8 @@
 
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="save">确 定</el-button>
+      <el-button type="primary" @click="save">保 存</el-button>
+      <el-button type="primary" @click="next">下一步</el-button>
     </div>
   </el-dialog>
 </template>
@@ -356,6 +378,7 @@ export default {
   },
 
   methods: {
+    next() {},
     fetchData() {
       this.listLoading = true;
       getList(this.queryForm).then((res) => {

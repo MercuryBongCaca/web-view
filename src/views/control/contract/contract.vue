@@ -27,7 +27,7 @@
           type="primary"
           native-type="submit"
           @click="handleQuery"
-          >查询
+          >查询q3
         </el-button>
       </el-form-item>
     </el-form>
