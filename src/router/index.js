@@ -78,7 +78,7 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: "/control",
+    path: "/employee",
     component: Layout,
     redirect: "noRedirect",
     children: [
@@ -94,7 +94,7 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: "/control",
+    path: "/member",
     component: Layout,
     redirect: "noRedirect",
     children: [
@@ -110,7 +110,7 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: "/control",
+    path: "/contract",
     component: Layout,
     redirect: "noRedirect",
     children: [
@@ -120,6 +120,22 @@ export const asyncRoutes = [
         component: () => import("@/views/control/contract/contract"),
         meta: {
           title: "合同管理",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
+    path: "/goods",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/goods",
+        name: "Goods",
+        component: () => import("@/views/control/goods/goods"),
+        meta: {
+          title: "商品销售",
           icon: "user-shield",
         },
       },

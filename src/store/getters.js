@@ -17,4 +17,6 @@ export default {
   employeeList: (state) => state.baseData.employeeList,
   courseList: (state) => state.baseData.courseList,
   areaList: (state) => state.baseData.areaList,
+  paymentTypeList: (state) => state.baseData.paymentTypeList,
+  contractStatusList: (state) => state.baseData.contractStatusList,
 };

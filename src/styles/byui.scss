@@ -95,6 +95,19 @@ html {
   .zq_p_10 {
     padding: 10px;
   }
+  .el-input-number--small {
+    width: 100%;
+  }
+  .el-date-editor.el-input,
+  .el-date-editor.el-input__inner {
+    width: 100%;
+  }
+  .el-select {
+    width: 100%;
+  }
+  .el-input-number .el-input__inner {
+    text-align: left;
+  }
   //zq_class end
   .system_tabs {
     padding: 20px;
@@ -403,16 +416,16 @@ html {
 
     /*tag结束*/
     /*按钮开始*/
-    .el-button {
-      padding: 8px 20px;
-      border-radius: $base-border-radius;
-      font-size: $base-font-size-default;
+    // .el-button {
+    //   padding: 8px 20px;
+    //   border-radius: $base-border-radius;
+    //   font-size: $base-font-size-default;
 
-      button:hover::before {
-        transform-origin: center;
-        transform: scaleX(1);
-      }
-    }
+    //   button:hover::before {
+    //     transform-origin: center;
+    //     transform: scaleX(1);
+    //   }
+    // }
 
     /*按钮结束*/
     /*弹窗开始*/

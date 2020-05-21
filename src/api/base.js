@@ -24,3 +24,15 @@ export function getTemplateList() {
     method: "post",
   });
 }
+export function getPaymentTypeList() {
+  return request({
+    url: "/system/getPaymentType",
+    method: "post",
+  });
+}
+export function getContractStatusList() {
+  return request({
+    url: "/system/getContractStatus",
+    method: "post",
+  });
+}
