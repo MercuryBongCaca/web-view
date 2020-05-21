@@ -91,11 +91,9 @@ export default {
       this.dialogFormVisible = false;
     },
     save() {
-      console.log(this.courseForm);
       this.dialogFormVisible = false;
     },
     setDialogWidth() {
-      console.log(document.body.clientWidth);
       var val = document.body.clientWidth;
       if (val < 500) {
         this.dialogWidth = "95%";

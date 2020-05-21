@@ -2,40 +2,30 @@ import request from "@/utils/request";
 import { encryptedData } from "@/utils/encrypt";
 import { getPublicKey } from "@/api/publicKey";
 import { loginRSA } from "@/config/settings";
-
+var headers = {
+  "Content-Type": "application/json;charset=utf-8",
+};
 export async function login(data) {
-  let headers = {
-    "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-  };
-  if (loginRSA) {
-    data = await encryptedData(data);
-    await getPublicKey().then((res) => {
-      if (!res.data.mockServer)
-        headers = { "Content-Type": "application/json;charset=utf-8" };
-    });
-  }
-
   return request({
-    url: "/login",
+    url: "/api/Employee/EmployeeLgoin",
     method: "post",
-    data,
+    data: data,
     headers: headers,
   });
 }
 
 export function getInfo(accessToken) {
   return request({
-    url: "/user/info",
+    url: "/api/Employee/tokeninfo",
     method: "post",
-    data: {
-      accessToken,
-    },
+    data: accessToken,
+    headers: headers,
   });
 }
 
 export function logout() {
   return request({
-    url: "/logout",
+    url: "/api/Employee/logout",
     method: "post",
   });
 }

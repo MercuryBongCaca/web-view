@@ -17,7 +17,7 @@
                 icon="el-icon-search"
                 type="primary"
                 native-type="submit"
-                @click="courseQuery"
+                @click="selectCourse"
                 >查询
               </el-button>
             </el-form-item>
@@ -46,35 +46,43 @@
               <div style="width: 80px; height: 50px;">
                 <el-image
                   v-if="imgShow"
-                  :preview-src-list="[scope.row.imgURL]"
-                  :src="scope.row.imgURL"
+                  :preview-src-list="[scope.row.pictureUrl]"
+                  :src="imageUrl + scope.row.pictureUrl"
                   style="width: 80px; height: 50px;"
                 ></el-image>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="课程名称" prop="Name"></el-table-column>
+          <!-- <el-table-column label="课程图片" width="80">
+            <template slot-scope="scope">
+              <div style="width: 80px; height: 50px;">
+                
+                <img :src="'http://localhost:8002'+scope.row.pictureUrl" alt="">
+              </div>
+            </template>
+          </el-table-column> -->
+          <el-table-column label="课程名称" prop="courseName"></el-table-column>
           <el-table-column
             label="课程类型"
-            prop="TypeName"
+            prop="courseTypeName"
             width="110"
           ></el-table-column>
           <el-table-column
             label="时长"
-            prop="Min"
+            prop="courseDuration"
             width="110"
           ></el-table-column>
           <el-table-column class-name="status-col" label="售卖状态" width="110">
             <template slot-scope="scope">
-              <el-tag :type="scope.row.Status | statusFilter"
-                >{{ scope.row.StatusName }}
+              <el-tag :type="scope.row.status | statusFilter"
+                >{{ scope.row.statusName }}
               </el-tag>
             </template>
           </el-table-column>
 
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="courseEdit(scope.row)"
+              <el-button type="text" @click="courseEdit(scope)"
                 >编辑
               </el-button>
             </template>
@@ -89,7 +97,7 @@
           @current-change="courseCurrentChange"
           @size-change="courseSizeChange"
         ></el-pagination>
-        <edit ref="edit"></edit>
+        <edit ref="edit" @resetSearch="selectCourse"></edit>
       </el-tab-pane>
       <el-tab-pane label="价格设定" name="second">
         <byui-query-form>
@@ -136,7 +144,7 @@
                 <el-image
                   v-if="imgShow"
                   :preview-src-list="[scope.row.imgURL]"
-                  :src="scope.row.imgURL"
+                  :src="'http://localhost:8002' + scope.row.imgURL"
                   style="width: 80px; height: 50px;"
                 ></el-image>
               </div>
@@ -183,7 +191,12 @@
 
 <script>
 import checkPermission from "@/utils/permission";
-import { getList } from "@/api/table";
+import {
+  getList,
+  getCourseList,
+  deleteCourse,
+  getCoursePriceList,
+} from "@/api/table";
 import Edit from "./components/edit";
 import PriceEdit from "./components/priceEdit";
 
@@ -206,27 +219,27 @@ export default {
   data() {
     return {
       activeName: "first",
+      imageUrl: process.env.VUE_APP_BASE_API2,
       courseList: [
         {
-          CourseID: "C1",
-          Name: "吉他初级",
-          Type: "1",
-          TypeName: "吉他",
-          Min: "30",
-          Remark: "",
-          Status: "1",
-          StatusName: "售卖",
-          ShopID: "",
-          IsDeleted: "",
+          courseID: "",
+          courseName: "",
+          courseTypeID: "",
+          courseTypeName: "",
+          courseDuration: "",
+          remarks: "",
+          status: "",
+          statusName: "",
+          shopID: "",
+          isDelete: "",
           upTime: "",
           upUser: "",
-          imgURL:
-            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
+          pictureUrl: "",
         },
       ],
       coursePriceList: [
         {
-          CourseName: "吉他初级",
+          CourseName: "吉他初级1",
           CourseTypeName: "乐器",
           CoursePriceID: "c1",
           CourseID: "d1",
@@ -267,6 +280,8 @@ export default {
   },
   created() {
     this.height = this.$baseTableHeight(1);
+    this.getCourseList(this.courseQueryForm);
+    this.getCoursePriceList(this.priceQueryForm);
   },
   beforeDestroy() {
     $("body").off("click");
@@ -281,6 +296,52 @@ export default {
     });
   },
   methods: {
+    getCourseList(page) {
+      const { pageNo, pageSize, name } = page;
+      return new Promise((resolve, reject) => {
+        getCourseList({ pageNo, pageSize, name })
+          .then((response) => {
+            const { data } = response;
+            this.courseList = response.data;
+            this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    selectCourse() {
+      this.getCourseList(this.courseQueryForm);
+    },
+    deleteCourse(CourseID) {
+      let self = this;
+      return new Promise((resolve, reject) => {
+        deleteCourse(CourseID)
+          .then((response) => {
+            const { data } = response;
+            this.$baseMessage("删除成功！", "success");
+            this.getCourseList(this.courseQueryForm);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    getCoursePriceList(page) {
+      const { pageNo, pageSize, name } = page;
+      return new Promise((resolve, reject) => {
+        getCoursePriceList({ pageNo, pageSize, name })
+          .then((response) => {
+            const { data } = response;
+            this.courseList = response.data;
+            this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    handleClick() {},
     tableSortChange() {
       const imageList = [];
       this.$refs.tableSort.tableData.forEach((item, index) => {
@@ -298,7 +359,8 @@ export default {
       this.$refs["edit"].showEdit();
     },
     courseEdit(row) {
-      this.$refs["edit"].showEdit(row);
+      let course = row.row;
+      this.$refs["edit"].showEdit(course);
     },
     priceAdd() {
       this.$refs["priceedit"].showPriceEdit();
@@ -310,12 +372,12 @@ export default {
       if (this.selectRows.length === 0) {
         return this.$baseMessage("请至少选择一项", "error");
       }
-      const ids = this.selectRows.map((item) => item.id).join();
+      const courseID = this.selectRows.map((item) => item.courseID).join();
       this.$baseConfirm(
         "你确定要删除选中项吗",
         null,
         () => {
-          this.$baseMessage("删除成功！", "success");
+          this.deleteCourse(courseID);
         },
         () => {
           alert("点击了取消");
@@ -327,15 +389,18 @@ export default {
     },
     courseCurrentChange(val) {
       this.courseQueryForm.pageNo = val;
+      this.getCourseList(this.courseQueryForm);
     },
     courseQuery() {
       this.courseQueryForm.pageNo = 1;
     },
     priceSizeChange(val) {
       this.priceQueryForm.pageSize = val;
+      this.getCourseList(this.courseQueryForm);
     },
     priceCurrentChange(val) {
       this.priceQueryForm.pageNo = val;
+      this.getCourseList(this.courseQueryForm);
     },
     priceQuery() {
       this.priceQueryForm.pageNo = 1;

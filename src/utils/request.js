@@ -10,7 +10,6 @@ import {
 } from "@/config/settings";
 import { Loading, Message } from "element-ui";
 import store from "@/store";
-import qs from "qs";
 import router from "@/router";
 
 const service = axios.create({
@@ -30,7 +29,8 @@ service.interceptors.request.use(
     if (process.env.NODE_ENV !== "test") {
       //这里是个坑哦，后端数据接收方式走的是application/x-www-form-urlencoded;charset=UTF-8，大多数公司可能接收方式不是这种
       if (config.data && !config.data.param) {
-        config.data = qs.stringify(config.data);
+        //config.data = qs.stringify(config.data);
+        config.data = JSON.stringify(config.data); //zzz修改接口 2020-05-02
       }
     }
 
@@ -44,7 +44,6 @@ service.interceptors.request.use(
     ) {
       loadingInstance = Loading.service();
     }
-
     return config;
   },
   (error) => {
