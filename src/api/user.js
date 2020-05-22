@@ -18,7 +18,7 @@ export function getInfo(accessToken) {
   return request({
     url: "/api/Employee/tokeninfo",
     method: "post",
-    data: accessToken,
+    data: { accessToken: accessToken },
     headers: headers,
   });
 }

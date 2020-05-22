@@ -30,7 +30,7 @@
           icon="el-icon-search"
           type="primary"
           native-type="submit"
-          @click="handleQuery"
+          @click="selectemployee"
           >查询
         </el-button>
       </el-form-item>
@@ -58,27 +58,23 @@
           <div style="width: 50px; height: 50px;">
             <el-image
               v-if="imgShow"
-              :preview-src-list="[scope.row.imgURL]"
-              :src="scope.row.imgURL"
+              :preview-src-list="[imageUrl + scope.row.headImgUrl]"
+              :src="imageUrl + scope.row.imgURL"
               style="width: 80px; height: 50px;"
             ></el-image>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" prop="Name" width="110"></el-table-column>
-      <el-table-column
-        label="性别"
-        prop="SexName"
-        width="110"
-      ></el-table-column>
+      <el-table-column label="姓名" prop="name" width="110"></el-table-column>
+      <el-table-column label="性别" prop="sex" width="110"></el-table-column>
       <el-table-column
         label="职位"
-        prop="RolesName"
+        prop="nickName"
         width="110"
       ></el-table-column>
       <el-table-column
         label="手机号"
-        prop="Mobile"
+        prop="mobile"
         width="110"
       ></el-table-column>
       <el-table-column class-name="status-col" label="员工状态" width="110">
@@ -90,21 +86,19 @@
             placement="top-start"
           >
             <el-tag :type="scope.row.Status | statusFilter"
-              >{{ scope.row.StatusName }}
+              >{{ scope.row.statusName }}
             </el-tag>
           </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column
         label="入职日期"
-        prop="EntryDate"
+        prop="entryData"
         width="200"
       ></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="text" @click="handleEdit(scope.row)"
-            >编辑
-          </el-button>
+          <el-button type="text" @click="handleEdit(scope)">编辑 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -117,13 +111,13 @@
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
     ></el-pagination>
-    <edit ref="edit"></edit>
+    <edit ref="edit" @resetSearch="selectemployee"></edit>
   </div>
 </template>
 
 <script>
 import checkPermission from "@/utils/permission";
-import { getList } from "@/api/table";
+import { getEmployeeList, deleteEmployee } from "@/api/employee";
 import Edit from "./components/edit";
 
 export default {
@@ -144,6 +138,7 @@ export default {
   data() {
     return {
       imgShow: true,
+      imageUrl: process.env.VUE_APP_BASE_API2,
       listLoading: true,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
@@ -157,40 +152,51 @@ export default {
         name: "",
         status: "0",
       },
-      employeeList: [
-        {
-          EmployeeID: "",
-          Name: "张三",
-          Sex: "1",
-          SexName: "男",
-          Roles: "1",
-          RolesName: "吉他老师",
-          Mobile: "13035961201",
-          Remark: "备注aaa",
-          LoginName: "admin",
-          PassWord: "11",
-          ShopID: "",
-          IsDeleted: "",
-          Status: "1",
-          StatusName: "在职",
-          EntryDate: "2020-1-12",
-          upTime: "",
-          upUser: "",
-          imgURL:
-            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
-        },
-      ],
+      employeeList: [],
     };
   },
   created() {
-    this.fetchData();
+    this.fetchData(this.priceQueryForm);
     this.height = this.$baseTableHeight(1);
+    this.getEmployeeList(this.queryForm);
   },
   beforeDestroy() {
     $("body").off("click");
   },
   mounted() {},
   methods: {
+    selectemployee() {
+      this.getEmployeeList(this.queryForm);
+    },
+    //绑定员工列表
+    getEmployeeList(page) {
+      const { pageNo, pageSize, name } = page;
+      return new Promise((resolve, reject) => {
+        getEmployeeList({ pageNo, pageSize, name })
+          .then((response) => {
+            const { data } = response;
+            this.employeeList = response.data;
+            this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除员工列表
+    deleteEmployee(employeeID) {
+      return new Promise((resolve, reject) => {
+        deleteEmployee(employeeID)
+          .then((response) => {
+            const { data } = response;
+            this.$baseMessage("删除成功！", "success");
+            this.getCourseList(this.courseQueryForm);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
     setSelectRows(val) {
       this.selectRows = val;
     },
@@ -198,18 +204,19 @@ export default {
       this.$refs["edit"].showEdit();
     },
     handleEdit(row) {
-      this.$refs["edit"].showEdit(row);
+      let employee = row.row;
+      this.$refs["edit"].showEdit(employee);
     },
     handleDelete() {
       if (this.selectRows.length === 0) {
         return this.$baseMessage("请至少选择一项", "error");
       }
-      const ids = this.selectRows.map((item) => item.id).join();
+      const employeeID = this.selectRows.map((item) => item.employeeID).join();
       this.$baseConfirm(
         "你确定要删除选中项吗",
         null,
         () => {
-          this.$baseMessage("删除成功！", "success");
+          this.deleteEmployee(employeeID);
         },
         () => {
           alert("点击了取消");
@@ -222,10 +229,6 @@ export default {
     },
     handleCurrentChange(val) {
       this.queryForm.pageNo = val;
-      this.fetchData();
-    },
-    handleQuery() {
-      this.queryForm.pageNo = 1;
       this.fetchData();
     },
     fetchData() {

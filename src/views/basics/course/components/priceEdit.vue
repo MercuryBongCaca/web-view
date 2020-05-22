@@ -5,39 +5,44 @@
     :width="dialogWidth"
     @close="close"
   >
-    <el-form :model="courseForm" label-width="100px">
+    <el-form :model="coursePriceForm" label-width="100px">
       <el-form-item label="课程名称">
         <el-select
-          v-model="courseForm.Type"
+          v-model="coursePriceForm.courseID"
           style="width: 100%;"
           placeholder="请选择活动区域"
         >
-          <el-option label="吉他课" value="1"></el-option>
-          <el-option label="架子鼓" value="2"></el-option>
+          <el-option
+            v-for="item in courseForm"
+            :key="item.courseID"
+            :label="item.courseName"
+            :value="item.courseID"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="计费方式">
-        <el-radio v-model="priceType" label="1">按节</el-radio>
-        <el-radio v-model="priceType" label="2">按天</el-radio>
+        <el-radio v-model="coursePriceForm.saleType" :label="1">按节</el-radio>
+        <el-radio v-model="coursePriceForm.saleType" :label="2">按天</el-radio>
       </el-form-item>
       <el-form-item label="数量区间">
         <el-input
-          v-model="courseForm.Min"
+          v-model="coursePriceForm.saleNumStart"
           autocomplete="off"
           style="width: 80px;"
         >
         </el-input
         >至
         <el-input
-          v-model="courseForm.Min"
+          v-model="coursePriceForm.saleNumEnd"
           autocomplete="off"
           style="width: 80px;"
         >
         </el-input>
-        {{ priceType == "1" ? "节" : "天" }}
+        {{ coursePriceForm.saleType == "1" ? "节" : "天" }}
       </el-form-item>
       <el-form-item label="课程单价">
-        <el-input v-model="courseForm.Min" autocomplete="off"> </el-input>
+        <el-input v-model="coursePriceForm.unitPrice" autocomplete="off">
+        </el-input>
       </el-form-item>
     </el-form>
     <div class="div_msg">
@@ -51,6 +56,12 @@
 </template>
 
 <script>
+import {
+  InsertCoursePrice,
+  UpdateCoursePrice,
+  GetCourseList,
+} from "@/api/table";
+
 export default {
   name: "PriceEdit",
   data() {
@@ -59,8 +70,8 @@ export default {
       dialogImageUrl: "",
       dialogVisible: false,
       dialogWidth: "340px",
-      courseForm: {},
-
+      courseForm: [],
+      coursePriceForm: [],
       title: "",
       dialogFormVisible: false,
     };
@@ -76,14 +87,19 @@ export default {
     };
   },
   methods: {
-    showPriceEdit(row) {
-      if (!row) {
+    showPriceEdit(coursePrice) {
+      if (!coursePrice) {
         this.title = "价格设定";
-        this.courseForm = {};
+        this.coursePriceForm = {
+          coursePriceID: "",
+        };
       } else {
         this.title = "价格设定";
-        this.courseForm = JSON.parse(JSON.stringify(row));
+        this.coursePriceForm = JSON.parse(JSON.stringify(coursePrice));
+        //给单选框赋值
+        console.log(this.coursePriceForm);
       }
+      this.GetCourseList();
       this.dialogFormVisible = true;
     },
     close() {
@@ -91,6 +107,15 @@ export default {
       this.dialogFormVisible = false;
     },
     save() {
+      if (this.coursePriceForm.coursePriceID != "") {
+        this.UpdateCoursePrice(this.coursePriceForm);
+      } else {
+        this.coursePriceForm.shopID = "945D66C8-ABB0-499B-A5A3-D4F1032C86BF";
+        this.coursePriceForm.isDelet = "0";
+        this.coursePriceForm.upTime = "2020-05-05";
+        this.coursePriceForm.upUser = "admin";
+        this.InsertCoursePrice(this.coursePriceForm);
+      }
       this.dialogFormVisible = false;
     },
     setDialogWidth() {
@@ -100,6 +125,58 @@ export default {
       } else {
         this.dialogWidth = "500px";
       }
+    },
+    //获取课程名称
+    GetCourseList() {
+      return new Promise((resolve, reject) => {
+        GetCourseList()
+          .then((response) => {
+            const { data } = response;
+            this.courseForm = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //添加课程价格
+    InsertCoursePrice(coursePriceForm) {
+      debugger;
+      let that = this;
+      return new Promise((resolve, reject) => {
+        InsertCoursePrice(coursePriceForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+              that.$emit("resetSearch");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改课程价格
+    UpdateCoursePrice(coursePriceForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        UpdateCoursePrice(coursePriceForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+              that.$emit("resetSearch");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     },
   },
 };

@@ -57,24 +57,24 @@ export const asyncRoutes = [
         component: () => import("@/views/basics/system/system"),
         meta: { title: "系统设定" },
       },
-      {
-        path: "course",
-        name: "Course",
-        component: () => import("@/views/basics/course/course"),
-        meta: { title: "课程设定" },
-      },
-      {
-        path: "schedule",
-        name: "Schedule",
-        component: () => import("@/views/basics/schedule/schedule"),
-        meta: { title: "课表设定" },
-      },
-      {
-        path: "goods",
-        name: "Goods",
-        component: () => import("@/views/basics/goods/goods"),
-        meta: { title: "商品设定" },
-      },
+      // {
+      //   path: "course",
+      //   name: "Course",
+      //   component: () => import("@/views/basics/course/course"),
+      //   meta: { title: "课程设定" },
+      // },
+      // {
+      //   path: "schedule",
+      //   name: "Schedule",
+      //   component: () => import("@/views/basics/schedule/schedule"),
+      //   meta: { title: "课表设定" },
+      // },
+      // {
+      //   path: "goods",
+      //   name: "Goods",
+      //   component: () => import("@/views/basics/goods/goods"),
+      //   meta: { title: "商品设定" },
+      // },
     ],
   },
   {

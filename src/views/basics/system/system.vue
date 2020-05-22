@@ -6,30 +6,30 @@
         <div style="margin: 20px;"></div>
         <el-row :gutter="20">
           <el-form
-            ref="baseform"
+            ref="Shopform"
             :label-position="labelPosition"
             :rules="shopRules"
-            :model="baseform"
+            :model="Shopform"
           >
             <el-col :span="8">
-              <el-form-item label="代码" prop="ShopNo">
-                <el-input v-model="baseform.ShopNo"></el-input>
+              <el-form-item label="代码" prop="shopCode">
+                <el-input v-model="Shopform.shopCode"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="机构名称" prop="ShopName">
-                <el-input v-model="baseform.ShopName"></el-input>
+              <el-form-item label="机构名称" prop="shopName">
+                <el-input v-model="Shopform.shopName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="电话">
-                <el-input v-model="baseform.ShopNumber"> </el-input>
+              <el-form-item label="电话" prop="umobile">
+                <el-input v-model="Shopform.umobile"> </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="24">
               <el-form-item label="地址&简介">
                 <el-input
-                  v-model="baseform.Uaddress"
+                  v-model="Shopform.uaddress"
                   type="textarea"
                 ></el-input>
               </el-form-item>
@@ -42,30 +42,30 @@
               </el-form-item>
             </el-col> -->
             <el-col :span="8">
-              <el-form-item label="负责人" prop="Uname">
-                <el-input v-model="baseform.Uname"></el-input>
+              <el-form-item label="负责人" prop="uname">
+                <el-input v-model="Shopform.uname"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="手机号" prop="Umobile">
-                <el-input v-model="baseform.Umobile"></el-input>
+              <el-form-item label="手机号" prop="telephone">
+                <el-input v-model="Shopform.telephone"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="微信号">
-                <el-input v-model="baseform.WeChat"> </el-input>
+                <el-input v-model="Shopform.wechatNumber"> </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="Email">
-                <el-input v-model="baseform.Email">
+                <el-input v-model="Shopform.email">
                   <i slot="prefix" class="el-input__icon el-icon-message"></i>
                 </el-input>
               </el-form-item>
             </el-col>
 
             <el-col :span="24" align="right">
-              <el-button type="primary" @click="baseformSave('baseform')"
+              <el-button type="primary" @click="ShopformSave('Shopform')"
                 >保存
               </el-button>
             </el-col>
@@ -81,7 +81,7 @@
           <el-button
             icon="el-icon-plus"
             type="primary"
-            @click="roleDialogFormVisible = true"
+            @click="roleEdit('', 'add')"
             >添加
           </el-button>
         </div>
@@ -91,50 +91,10 @@
           element-loading-text="正在加载..."
           height="80vh"
         >
-          <el-table-column type="expand">
-            <template slot-scope="scope">
-              <div style="margin-top: 20px;">
-                <el-col
-                  :span="24"
-                  style="text-align: left; padding: 0px 0px 20px 30px;"
-                >
-                  <h4>权限</h4>
-                </el-col>
-                <el-row :gutter="20">
-                  <el-checkbox-group
-                    v-model="authorityRoles[scope.row.RolesID]"
-                    size="small"
-                  >
-                    <el-col
-                      v-for="item in authorityList"
-                      :key="item.AuthorityID"
-                      style="margin-bottom: 20px;"
-                      :xs="12"
-                      :sm="6"
-                      :md="5"
-                      :lg="4"
-                      :xl="3"
-                    >
-                      <el-checkbox :label="item.AuthorityID" border>{{
-                        item.Name
-                      }}</el-checkbox>
-                    </el-col>
-                  </el-checkbox-group>
-                  <el-col :span="24" align="right">
-                    <el-button
-                      type="primary"
-                      @click="authorityRolesSave(scope.row.RolesID)"
-                      >保存
-                    </el-button>
-                  </el-col>
-                </el-row>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="角色名" prop="Name"></el-table-column>
+          <el-table-column label="角色名" prop="name"></el-table-column>
           <el-table-column
             label="权限"
-            prop="Authoritys"
+            prop="authorityName"
             width="150"
           ></el-table-column>
           <el-table-column label="操作">
@@ -151,12 +111,31 @@
       </el-card>
       <el-dialog
         :visible.sync="roleDialogFormVisible"
-        width="300px"
+        width="500px"
         title="添加角色"
       >
         <el-form ref="roleform" :model="roleform" :rules="roleRules">
-          <el-form-item label="角色名称" prop="Name">
-            <el-input v-model="roleform.Name" autocomplete="off"></el-input>
+          <el-form-item label="角色名称" prop="name">
+            <el-input
+              v-model="roleform.name"
+              style="width: 200px;"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="权限">
+            <el-select
+              v-model="roleform.authorityID"
+              multiple
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in authorityList"
+                :key="item.authorityID"
+                :label="item.name"
+                :value="item.authorityID"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -178,7 +157,7 @@
                 <el-button
                   icon="el-icon-plus"
                   type="primary"
-                  @click="courseTypeDialogFormVisible = true"
+                  @click="courseTypeEdit('', 'add')"
                   >添加
                 </el-button>
               </div>
@@ -188,8 +167,11 @@
                 element-loading-text="正在加载..."
                 height="80vh"
               >
-                <el-table-column label="名称" prop="Name"></el-table-column>
-                <el-table-column label="备注" prop="Remark"></el-table-column>
+                <el-table-column
+                  label="名称"
+                  prop="courseTypeName"
+                ></el-table-column>
+                <el-table-column label="备注" prop="remarks"></el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
                     <el-button
@@ -219,15 +201,15 @@
           :model="courseTypeform"
           :rules="courseTypeRules"
         >
-          <el-form-item label="类型名称" prop="Name">
+          <el-form-item label="类型名称" prop="courseTypeName">
             <el-input
-              v-model="courseTypeform.Name"
+              v-model="courseTypeform.courseTypeName"
               autocomplete="off"
             ></el-input>
           </el-form-item>
           <el-form-item label="备注">
             <el-input
-              v-model="courseTypeform.Remark"
+              v-model="courseTypeform.remarks"
               type="textarea"
             ></el-input>
           </el-form-item>
@@ -253,7 +235,7 @@
                 <el-button
                   icon="el-icon-plus"
                   type="primary"
-                  @click="goodsTypeDialogFormVisible = true"
+                  @click="goodsTypeEdit('', 'add')"
                   >添加
                 </el-button>
               </div>
@@ -264,8 +246,11 @@
                 element-loading-text="正在加载..."
                 height="80vh"
               >
-                <el-table-column label="名称" prop="Name"></el-table-column>
-                <el-table-column label="备注" prop="Remark"></el-table-column>
+                <el-table-column
+                  label="名称"
+                  prop="goodTypeName"
+                ></el-table-column>
+                <el-table-column label="备注" prop="remarks"></el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
                     <el-button
@@ -296,14 +281,17 @@
           :model="goodsTypeform"
           :rules="goodsTypeRules"
         >
-          <el-form-item label="类型名称" prop="Name">
+          <el-form-item label="类型名称" prop="goodTypeName">
             <el-input
-              v-model="goodsTypeform.Name"
+              v-model="goodsTypeform.goodTypeName"
               autocomplete="off"
             ></el-input>
           </el-form-item>
           <el-form-item label="备注">
-            <el-input v-model="goodsTypeform.Remark" type="textarea"></el-input>
+            <el-input
+              v-model="goodsTypeform.remarks"
+              type="textarea"
+            ></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -327,7 +315,7 @@
                 <el-button
                   icon="el-icon-plus"
                   type="primary"
-                  @click="areaDialogFormVisible = true"
+                  @click="areaEdit('', 'add')"
                   >添加
                 </el-button>
               </div>
@@ -338,9 +326,12 @@
                 element-loading-text="正在加载..."
                 height="80vh"
               >
-                <el-table-column label="名称" prop="Name"></el-table-column>
-                <el-table-column label="面积" prop="Size"></el-table-column>
-                <el-table-column label="备注" prop="Remark"></el-table-column>
+                <el-table-column label="名称" prop="areaName"></el-table-column>
+                <el-table-column
+                  label="面积"
+                  prop="areaCovered"
+                ></el-table-column>
+                <el-table-column label="备注" prop="remarks"></el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
                     <el-button type="text" @click="areaEdit(scope.row, 'edit')"
@@ -363,14 +354,17 @@
         title="场地编辑"
       >
         <el-form ref="areaform" :model="areaform" :rules="areaRules">
-          <el-form-item label="场地名称" prop="Name">
-            <el-input v-model="areaform.Name" autocomplete="off"></el-input>
+          <el-form-item label="场地名称" prop="areaName">
+            <el-input v-model="areaform.areaName" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="面积">
-            <el-input v-model="areaform.Size" autocomplete="off"></el-input>
+            <el-input
+              v-model="areaform.areaCovered"
+              autocomplete="off"
+            ></el-input>
           </el-form-item>
           <el-form-item label="备注">
-            <el-input v-model="areaform.Remark" type="textarea"></el-input>
+            <el-input v-model="areaform.remarks" type="textarea"></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -384,53 +378,54 @@
   </el-tabs>
 </template>
 <script>
-import { SaveShop } from "@/api/shop_basics";
+import { SaveShop, getShopList } from "@/api/shop_basics";
+import {
+  GetCourseTypeList,
+  UpdateCourseType,
+  InsertCourseType,
+  deleteCourseType,
+} from "@/api/table";
+import {
+  GetGoodTypeList,
+  UpdateGoodType,
+  InsertGoodType,
+  deleteGoodType,
+} from "@/api/good";
+import { GetAreaList, UpdateArea, InsertArea, deleteArea } from "@/api/area";
+import {
+  getRolesList,
+  UpdateRoles,
+  InsertRoles,
+  deleteRoles,
+  getAuthorityList,
+} from "@/api/roles";
+
 export default {
   name: "System",
   components: {},
   filters: {},
   data() {
     return {
+      value1: [],
       areaDialogFormVisible: false,
       goodsTypeDialogFormVisible: false,
       courseTypeDialogFormVisible: false,
       roleDialogFormVisible: false,
-      courseTypeList: [
-        {
-          TypeID: "c2",
-          Name: "音乐",
-          Remark: "有架子鼓,吉他,钢琴等",
-        },
-      ],
-      goodsTypeList: [
-        {
-          TypeID: "g2",
-          Name: "饮料",
-          Remark: "新饮料",
-        },
-      ],
+      ShopID: "945D66C8-ABB0-499B-A5A3-D4F1032C86BF",
+      //基础信息表单
+      Shopform: {},
+      courseTypeList: [],
+      goodsTypeList: [],
       areaList: [
         {
-          TypeID: "a2",
-          Name: "基础场地",
-          Size: 36.7,
-          Remark: "绿化好",
+          areaID: "",
         },
       ],
       authorityRoles: {},
-      authorityList: [
-        { AuthorityID: "a1", Name: "员工修改" },
-        { AuthorityID: "a2", Name: "员工添加" },
-      ],
-      rolesList: [
-        {
-          RolesID: "b2",
-          Name: "管理员A",
-          Authoritys: "员工修改,员工修改A,员工修改B,员工修改C",
-        },
-      ],
+      authorityList: [],
+      rolesList: [],
       areaRules: {
-        Name: [
+        areaName: [
           {
             required: true,
             message: "请输入场地名称",
@@ -439,7 +434,7 @@ export default {
         ],
       },
       goodsTypeRules: {
-        Name: [
+        goodTypeName: [
           {
             required: true,
             message: "请输入类型名称",
@@ -448,7 +443,7 @@ export default {
         ],
       },
       courseTypeRules: {
-        Name: [
+        courseTypeName: [
           {
             required: true,
             message: "请输入类型名称",
@@ -457,7 +452,7 @@ export default {
         ],
       },
       roleRules: {
-        Name: [
+        name: [
           {
             required: true,
             message: "请输入角色名称",
@@ -466,7 +461,7 @@ export default {
         ],
       },
       shopRules: {
-        ShopNo: [
+        shopCode: [
           {
             required: true,
             message: "请输入编号(用于登录,简短易记)",
@@ -479,7 +474,7 @@ export default {
             trigger: "blur",
           },
         ],
-        ShopName: [
+        shopName: [
           {
             required: true,
             message: "请输入名称",
@@ -492,7 +487,7 @@ export default {
             trigger: "blur",
           },
         ],
-        Uname: [
+        uname: [
           {
             required: true,
             message: "请输入负责人",
@@ -505,7 +500,7 @@ export default {
             trigger: "blur",
           },
         ],
-        Umobile: [
+        umobile: [
           {
             required: true,
             message: "请输入负责人手机号",
@@ -520,41 +515,10 @@ export default {
         ],
       },
       labelPosition: "top",
-      baseform: {
-        ShopID: "",
-        ShopNo: "",
-        ShopName: "",
-        Uname: "",
-        Umobile: "",
-        ShopNumber: "",
-        WeChat: "",
-        Email: "",
-        Uaddress: "",
-        IndexUrl: "",
-        UID: "",
-        BeginTime: "",
-        EndTime: "",
-        Status: "",
-        IsDeleted: "",
-        upTime: "",
-        upUser: "",
-      },
-      roleform: {
-        Name: "",
-        RolesID: "",
-      },
-      goodsTypeform: {
-        Name: "",
-        TypeID: "",
-      },
-      areaform: {
-        Name: "",
-        AreaID: "",
-      },
-      courseTypeform: {
-        Name: "",
-        TypeID: "",
-      },
+      roleform: {},
+      goodsTypeform: {},
+      areaform: {},
+      courseTypeform: {},
       activeName: "first",
     };
   },
@@ -563,23 +527,107 @@ export default {
     self.rolesList.forEach(function (value) {
       self.$set(self.authorityRoles, value.RolesID, []);
     });
+    //绑定基础信息
+    this.getShopList(this.ShopID);
+    //绑定角色信息
+    this.getRolesList();
+    //绑定权限信息
+    this.getAuthorityList(this.ShopID);
+    //绑定课程类型
+    this.GetCourseTypeList();
+    //绑定商品类型
+    this.GetGoodTypeList();
+    //绑定场地列表
+    this.GetAreaList();
   },
   methods: {
     handleAdd() {},
-    authorityRolesSave(roleid) {
-      //角色权限保存
-      let self = this;
-      let checkedRoles = self.authorityRoles[roleid]; //选中的权限
-      console.log(checkedRoles);
+    //获取权限信息
+    getAuthorityList(ShopID) {
+      return new Promise((resolve, reject) => {
+        getAuthorityList(ShopID)
+          .then((response) => {
+            const { data } = response;
+            this.authorityList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     },
-
-    baseformSave(formName) {
+    //获取课程类型列表
+    getRolesList() {
+      return new Promise((resolve, reject) => {
+        getRolesList()
+          .then((response) => {
+            const { data } = response;
+            this.rolesList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //获取课程类型列表
+    GetCourseTypeList() {
+      return new Promise((resolve, reject) => {
+        GetCourseTypeList()
+          .then((response) => {
+            const { data } = response;
+            this.courseTypeList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //获取商品类型列表
+    GetGoodTypeList() {
+      return new Promise((resolve, reject) => {
+        GetGoodTypeList()
+          .then((response) => {
+            const { data } = response;
+            this.goodsTypeList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //获取商品类型列表
+    GetAreaList() {
+      return new Promise((resolve, reject) => {
+        GetAreaList()
+          .then((response) => {
+            const { data } = response;
+            this.areaList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //基础信息赋值
+    getShopList(ShopID) {
+      return new Promise((resolve, reject) => {
+        getShopList(ShopID)
+          .then((response) => {
+            const { data } = response;
+            this.Shopform = response.data[0];
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //基础信息保存
+    ShopformSave(formName) {
       let self = this;
       self.$refs[formName].validate((valid) => {
         if (valid) {
           self.$baseMessage("保存成功！", "success");
           //调用API  import { SaveShop } from "@/api/shop_basics";
-          SaveShop(self.baseform).then((res) => {
+          SaveShop(self.Shopform).then((res) => {
             console.log(res);
           });
           //self.$refs[formName].resetFields();//重置表单
@@ -592,11 +640,13 @@ export default {
       let self = this;
       self.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(self.goodsTypeform);
-          self.$baseMessage("保存成功！", "success");
-          self.goodsTypeDialogFormVisible = false;
-
-          self.$refs[formName].resetFields(); //重置表单
+          if (self.areaform.areaID != "") {
+            self.UpdateArea(self.areaform);
+          } else {
+            self.InsertArea(self.areaform);
+          }
+          self.areaDialogFormVisible = false;
+          // self.$refs[formName].resetFields(); //重置表单
         } else {
           return false;
         }
@@ -606,11 +656,12 @@ export default {
       let self = this;
       self.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(self.goodsTypeform);
-          self.$baseMessage("保存成功！", "success");
+          if (self.goodsTypeform.goodTypeID != "") {
+            self.UpdateGoodType(self.goodsTypeform);
+          } else {
+            self.InsertGoodType(self.goodsTypeform);
+          }
           self.goodsTypeDialogFormVisible = false;
-
-          self.$refs[formName].resetFields(); //重置表单
         } else {
           return false;
         }
@@ -618,49 +669,67 @@ export default {
     },
     areaEdit(row, flag) {
       let self = this;
-      self.areaform = JSON.parse(JSON.stringify(row));
       if (flag == "edit") {
+        self.areaform = JSON.parse(JSON.stringify(row));
         self.areaDialogFormVisible = true;
-      } else {
+      } else if (flag == "del") {
+        self.areaform = JSON.parse(JSON.stringify(row));
         this.$baseConfirm(
           "你确定要删除选中项吗",
           null,
           () => {
+            self.deleteArea(self.areaform.areaID);
             self.$baseMessage("删除成功！", "success");
           },
           () => {
             console.log("点击了取消");
           }
         );
+      } else if (flag == "add") {
+        self.areaDialogFormVisible = true;
+        self.areaform.areaID = "";
+        self.areaform.areaName = "";
+        self.areaform.areaCovered = "";
+        self.areaform.remarks = "";
       }
     },
     goodsTypeEdit(row, flag) {
       let self = this;
-      self.goodsTypeform = JSON.parse(JSON.stringify(row));
       if (flag == "edit") {
+        self.goodsTypeform = JSON.parse(JSON.stringify(row));
         self.goodsTypeDialogFormVisible = true;
-      } else {
+      } else if (flag == "del") {
+        self.goodsTypeform = JSON.parse(JSON.stringify(row));
         this.$baseConfirm(
           "你确定要删除选中项吗",
           null,
           () => {
+            self.deleteGoodType(self.goodsTypeform.goodTypeID);
             self.$baseMessage("删除成功！", "success");
           },
           () => {
             console.log("点击了取消");
           }
         );
+      } else if (flag == "add") {
+        self.goodsTypeDialogFormVisible = true;
+        // self.$refs[formName].resetFields(); //重置表单
+        self.goodsTypeform.goodTypeID = "";
+        self.goodsTypeform.goodTypeName = "";
+        self.goodsTypeform.remarks = "";
       }
     },
     courseTypeAdd(formName) {
       let self = this;
       self.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(self.courseTypeform);
-          self.$baseMessage("保存成功！", "success");
+          if (self.courseTypeform.courseTypeID != "") {
+            self.UpdateCourseType(self.courseTypeform);
+          } else {
+            self.InsertCourseType(self.courseTypeform);
+          }
           self.courseTypeDialogFormVisible = false;
-
-          self.$refs[formName].resetFields(); //重置表单
+          // self.$refs[formName].resetFields(); //重置表单
         } else {
           return false;
         }
@@ -668,31 +737,255 @@ export default {
     },
     courseTypeEdit(row, flag) {
       let self = this;
-      self.courseTypeform = JSON.parse(JSON.stringify(row));
+
       if (flag == "edit") {
+        self.courseTypeform = JSON.parse(JSON.stringify(row));
         self.courseTypeDialogFormVisible = true;
-      } else {
+      } else if (flag == "del") {
+        self.courseTypeform = JSON.parse(JSON.stringify(row));
         this.$baseConfirm(
           "你确定要删除选中项吗",
           null,
           () => {
+            self.deleteCourseType(self.courseTypeform.courseTypeID);
             self.$baseMessage("删除成功！", "success");
           },
           () => {
             console.log("点击了取消");
           }
         );
+      } else if (flag == "add") {
+        self.courseTypeDialogFormVisible = true;
+        // self.$refs[formName].resetFields(); //重置表单
+        self.courseTypeform.courseTypeID = "";
+        self.courseTypeform.courseTypeName = "";
+        self.courseTypeform.remarks = "";
       }
+    },
+    //添加课程类型
+    InsertCourseType(courseTypeForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        InsertCourseType(courseTypeForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+            this.GetCourseTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改课程价格
+    UpdateCourseType(courseTypeForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        UpdateCourseType(courseTypeForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+            this.GetCourseTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除课程类型
+    deleteCourseType(CourseTypeID) {
+      return new Promise((resolve, reject) => {
+        deleteCourseType(CourseTypeID)
+          .then((response) => {
+            const { data } = response;
+            this.GetCourseTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //添加商品类型
+    InsertGoodType(goodTypeForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        InsertGoodType(goodTypeForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+            this.GetGoodTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改商品类型
+    UpdateGoodType(goodTypeForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        UpdateGoodType(goodTypeForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+            this.GetGoodTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除商品类型
+    deleteGoodType(goodTypeID) {
+      return new Promise((resolve, reject) => {
+        deleteGoodType(goodTypeID)
+          .then((response) => {
+            const { data } = response;
+            this.GetGoodTypeList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //添加场地
+    InsertArea(areaForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        InsertArea(areaForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+            this.GetAreaList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改场地
+    UpdateArea(areaForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        UpdateArea(areaForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+            this.GetAreaList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除场地
+    deleteArea(areaID) {
+      return new Promise((resolve, reject) => {
+        deleteArea(areaID)
+          .then((response) => {
+            const { data } = response;
+            this.GetAreaList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //添加角色
+    InsertRoles(rolesForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        let rolesau = {
+          authorityID: JSON.stringify(rolesForm.authorityID),
+          name: rolesForm.name,
+          rolesID: rolesForm.rolesID,
+        };
+        InsertRoles(rolesau)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+            this.getRolesList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改角色
+    UpdateRoles(rolesForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        let rolesau = {
+          authorityID: JSON.stringify(rolesForm.authorityID),
+          name: rolesForm.name,
+          rolesID: rolesForm.rolesID,
+        };
+        UpdateRoles(rolesau)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+            this.getRolesList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除角色
+    deleteRoles(rolesID) {
+      return new Promise((resolve, reject) => {
+        deleteRoles(rolesID)
+          .then((response) => {
+            const { data } = response;
+            this.getRolesList();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     },
     roleAdd(formName) {
       let self = this;
       self.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(self.roleform);
-          self.$baseMessage("保存成功！", "success");
+          if (self.roleform.rolesID != "") {
+            self.UpdateRoles(self.roleform);
+          } else {
+            self.InsertRoles(self.roleform);
+          }
           self.roleDialogFormVisible = false;
-
-          self.$refs[formName].resetFields(); //重置表单
         } else {
           return false;
         }
@@ -700,20 +993,29 @@ export default {
     },
     roleEdit(row, flag) {
       let self = this;
-      self.roleform = JSON.parse(JSON.stringify(row));
       if (flag == "edit") {
+        self.roleform = JSON.parse(JSON.stringify(row));
+        let authorityIDs = self.roleform.authorityID.split(",");
+        self.roleform.authorityID = authorityIDs;
         self.roleDialogFormVisible = true;
-      } else {
+      } else if (flag == "del") {
+        self.roleform = JSON.parse(JSON.stringify(row));
         this.$baseConfirm(
           "你确定要删除选中项吗",
           null,
           () => {
+            self.deleteRoles(self.roleform.rolesID);
             self.$baseMessage("删除成功！", "success");
           },
           () => {
             console.log("点击了取消");
           }
         );
+      } else if (flag == "add") {
+        self.roleDialogFormVisible = true;
+        self.roleform.rolesID = "";
+        self.roleform.name = "";
+        self.roleform.authorityID = "";
       }
     },
     handleClick(tab, event) {},

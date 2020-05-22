@@ -46,7 +46,7 @@
               <div style="width: 80px; height: 50px;">
                 <el-image
                   v-if="imgShow"
-                  :preview-src-list="[scope.row.pictureUrl]"
+                  :preview-src-list="[imageUrl + scope.row.pictureUrl]"
                   :src="imageUrl + scope.row.pictureUrl"
                   style="width: 80px; height: 50px;"
                 ></el-image>
@@ -115,7 +115,7 @@
                 icon="el-icon-search"
                 type="primary"
                 native-type="submit"
-                @click="priceQuery"
+                @click="selectCoursePrice"
                 >查询
               </el-button>
             </el-form-item>
@@ -125,7 +125,10 @@
           <el-button icon="el-icon-plus" type="primary" @click="priceAdd"
             >添加
           </el-button>
-          <el-button icon="el-icon-delete" type="danger" @click="courseDelete"
+          <el-button
+            icon="el-icon-delete"
+            type="danger"
+            @click="coursePriceDelete"
             >删除
           </el-button>
         </div>
@@ -143,34 +146,32 @@
               <div style="width: 80px; height: 50px;">
                 <el-image
                   v-if="imgShow"
-                  :preview-src-list="[scope.row.imgURL]"
-                  :src="'http://localhost:8002' + scope.row.imgURL"
+                  :preview-src-list="[imageUrl + scope.row.pictureUrl]"
+                  :src="imageUrl + scope.row.pictureUrl"
                   style="width: 80px; height: 50px;"
                 ></el-image>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="课程名称" prop="CourseName"></el-table-column>
+          <el-table-column label="课程名称" prop="courseName"></el-table-column>
           <el-table-column
             label="课程类型"
-            prop="CourseTypeName"
+            prop="courseTypeName"
             width="110"
           ></el-table-column>
           <el-table-column
             label="课程单价"
-            prop="Price"
+            prop="unitPrice"
             width="110"
           ></el-table-column>
           <el-table-column label="数量" width="200">
             <template slot-scope="scope">
-              {{ scope.row.Num1 + "-" + scope.row.Num2 }}
+              {{ scope.row.saleNumStart + "-" + scope.row.saleNumEnd }}
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="priceEdit(scope.row)"
-                >编辑
-              </el-button>
+              <el-button type="text" @click="priceEdit(scope)">编辑 </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -179,11 +180,14 @@
           :current-page="priceQueryForm.pageNo"
           :layout="layout"
           :page-size="priceQueryForm.pageSize"
-          :total="total"
+          :total="totalPrice"
           @current-change="priceCurrentChange"
           @size-change="priceSizeChange"
         ></el-pagination>
-        <price-edit ref="priceedit"></price-edit>
+        <price-edit
+          ref="priceedit"
+          @resetSearch="selectCoursePrice"
+        ></price-edit>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -196,6 +200,7 @@ import {
   getCourseList,
   deleteCourse,
   getCoursePriceList,
+  deleteCoursePrice,
 } from "@/api/table";
 import Edit from "./components/edit";
 import PriceEdit from "./components/priceEdit";
@@ -220,47 +225,15 @@ export default {
     return {
       activeName: "first",
       imageUrl: process.env.VUE_APP_BASE_API2,
-      courseList: [
-        {
-          courseID: "",
-          courseName: "",
-          courseTypeID: "",
-          courseTypeName: "",
-          courseDuration: "",
-          remarks: "",
-          status: "",
-          statusName: "",
-          shopID: "",
-          isDelete: "",
-          upTime: "",
-          upUser: "",
-          pictureUrl: "",
-        },
-      ],
-      coursePriceList: [
-        {
-          CourseName: "吉他初级1",
-          CourseTypeName: "乐器",
-          CoursePriceID: "c1",
-          CourseID: "d1",
-          Type: "1",
-          Num1: "1",
-          Num2: "100",
-          Price: "60",
-          ShopID: "",
-          IsDeleted: "",
-          upTime: "",
-          upUser: "",
-          imgURL:
-            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
-        },
-      ],
+      courseList: [],
+      coursePriceList: [],
       imgShow: true,
       list: [],
       imageList: [],
       listLoading: false,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
+      totalPrice: 0,
       background: true,
       height: 0,
       selectRows: "",
@@ -313,8 +286,10 @@ export default {
     selectCourse() {
       this.getCourseList(this.courseQueryForm);
     },
+    selectCoursePrice() {
+      this.getCoursePriceList(this.priceQueryForm);
+    },
     deleteCourse(CourseID) {
-      let self = this;
       return new Promise((resolve, reject) => {
         deleteCourse(CourseID)
           .then((response) => {
@@ -327,14 +302,29 @@ export default {
           });
       });
     },
+    deleteCoursePrice(CoursePriceID) {
+      let self = this;
+      return new Promise((resolve, reject) => {
+        deleteCoursePrice(CoursePriceID)
+          .then((response) => {
+            const { data } = response;
+            this.$baseMessage("删除成功！", "success");
+            this.getCoursePriceList(this.priceQueryForm);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
     getCoursePriceList(page) {
       const { pageNo, pageSize, name } = page;
       return new Promise((resolve, reject) => {
         getCoursePriceList({ pageNo, pageSize, name })
           .then((response) => {
             const { data } = response;
-            this.courseList = response.data;
-            this.total = Number(response.totalCount);
+            console.log(response.data);
+            this.coursePriceList = response.data;
+            this.totalPrice = Number(response.totalCount);
           })
           .catch((error) => {
             reject(error);
@@ -366,7 +356,8 @@ export default {
       this.$refs["priceedit"].showPriceEdit();
     },
     priceEdit(row) {
-      this.$refs["priceedit"].showPriceEdit(row);
+      let coursePrice = row.row;
+      this.$refs["priceedit"].showPriceEdit(coursePrice);
     },
     courseDelete() {
       if (this.selectRows.length === 0) {
@@ -378,6 +369,24 @@ export default {
         null,
         () => {
           this.deleteCourse(courseID);
+        },
+        () => {
+          alert("点击了取消");
+        }
+      );
+    },
+    coursePriceDelete() {
+      if (this.selectPriceRows.length === 0) {
+        return this.$baseMessage("请至少选择一项", "error");
+      }
+      const coursePriceID = this.selectPriceRows
+        .map((item) => item.coursePriceID)
+        .join();
+      this.$baseConfirm(
+        "你确定要删除选中项吗",
+        null,
+        () => {
+          this.deleteCoursePrice(coursePriceID);
         },
         () => {
           alert("点击了取消");
@@ -396,11 +405,10 @@ export default {
     },
     priceSizeChange(val) {
       this.priceQueryForm.pageSize = val;
-      this.getCourseList(this.courseQueryForm);
     },
     priceCurrentChange(val) {
       this.priceQueryForm.pageNo = val;
-      this.getCourseList(this.courseQueryForm);
+      this.getCoursePriceList(this.priceQueryForm);
     },
     priceQuery() {
       this.priceQueryForm.pageNo = 1;

@@ -1,9 +1,21 @@
 import request from "@/utils/request";
-
+var headers = {
+  "Content-Type": "application/json;charset=utf-8",
+};
 export function SaveShop(data) {
   return request({
-    url: "/shop_basics/SaveShop", //代码生成机生成的url,请修改为正确的url
+    url: "/api/Shop/UpdateShop",
     method: "post",
-    data,
+    data: data,
+    headers: headers,
+  });
+}
+
+export function getShopList(data) {
+  return request({
+    url: "/api/Shop/ShopList",
+    method: "post",
+    data: data,
+    headers: headers,
   });
 }

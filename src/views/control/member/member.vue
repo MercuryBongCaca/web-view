@@ -30,7 +30,7 @@
     <el-table
       ref="tableSort"
       v-loading="listLoading"
-      :data="employeeList"
+      :data="memberList"
       :element-loading-text="elementLoadingText"
       :height="height"
       @selection-change="setSelectRows"
@@ -42,27 +42,21 @@
           <div style="width: 50px; height: 50px;">
             <el-image
               v-if="imgShow"
-              :preview-src-list="[scope.row.imgURL]"
-              :src="scope.row.imgURL"
+              :preview-src-list="[imageUrl + scope.row.picturePath]"
+              :src="imageUrl + scope.row.picturePath"
               style="width: 80px; height: 50px;"
             ></el-image>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" prop="Name" width="110"></el-table-column>
-      <el-table-column
-        label="性别"
-        prop="SexName"
-        width="110"
-      ></el-table-column>
-      <el-table-column label="手机号" prop="Mobile"></el-table-column>
-      <el-table-column label="录入时间" prop="CreateTime"></el-table-column>
-      <el-table-column label="录入人" prop="EmployeeName"></el-table-column>
+      <el-table-column label="姓名" prop="name" width="110"></el-table-column>
+      <el-table-column label="性别" prop="sex" width="110"></el-table-column>
+      <el-table-column label="手机号" prop="mobile"></el-table-column>
+      <el-table-column label="录入时间" prop="enteredByTime"></el-table-column>
+      <el-table-column label="录入人" prop="enteredBy"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="text" @click="handleEdit(scope.row)"
-            >编辑
-          </el-button>
+          <el-button type="text" @click="handleEdit(scope)">编辑 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -75,13 +69,13 @@
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
     ></el-pagination>
-    <edit ref="edit"></edit>
+    <edit ref="edit" @resetSearch="selectmember"></edit>
   </div>
 </template>
 
 <script>
 import checkPermission from "@/utils/permission";
-import { getList } from "@/api/table";
+import { getMemberList, deleteMember } from "@/api/member";
 import Edit from "./components/edit";
 
 export default {
@@ -102,6 +96,7 @@ export default {
   data() {
     return {
       imgShow: true,
+      imageUrl: process.env.VUE_APP_BASE_API2,
       listLoading: true,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
@@ -115,41 +110,51 @@ export default {
         name: "",
         status: "0",
       },
-      employeeList: [
-        {
-          MemberID: "",
-          Name: "张三",
-          Sex: "1",
-          SexName: "男",
-          Mobile: "13035961201",
-          Remark: "备注aaa",
-          LoginName: "admin",
-          PassWord: "11",
-          ShopID: "",
-          IsDeleted: "",
-          CreateTime: "2020-1-12",
-          upTime: "",
-          upUser: "",
-          Referrer: "张三",
-          ReferrerMobile: "15635961764",
-          EmployeeID: "1",
-          EmployeeName: "李老师",
-          CreateDate: "2020-1-3",
-          imgURL:
-            "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3183730857,2780257894&fm=26&gp=0.jpg",
-        },
-      ],
+      memberList: [],
     };
   },
   created() {
     this.fetchData();
     this.height = this.$baseTableHeight(1);
+    this.getMemberList(this.queryForm);
   },
   beforeDestroy() {
     $("body").off("click");
   },
   mounted() {},
   methods: {
+    selectmember() {
+      this.getMemberList(this.queryForm);
+    },
+    //绑定会员列表
+    getMemberList(page) {
+      const { pageNo, pageSize, name } = page;
+      return new Promise((resolve, reject) => {
+        getMemberList({ pageNo, pageSize, name })
+          .then((response) => {
+            const { data } = response;
+            this.memberList = response.data;
+            this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除会员列表
+    deleteMember(memberID) {
+      return new Promise((resolve, reject) => {
+        deleteMember(memberID)
+          .then((response) => {
+            const { data } = response;
+            this.$baseMessage("删除成功！", "success");
+            this.getMemberList(this.queryForm);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
     setSelectRows(val) {
       this.selectRows = val;
     },
@@ -157,18 +162,19 @@ export default {
       this.$refs["edit"].showEdit();
     },
     handleEdit(row) {
-      this.$refs["edit"].showEdit(row);
+      let member = row.row;
+      this.$refs["edit"].showEdit(member);
     },
     handleDelete() {
       if (this.selectRows.length === 0) {
         return this.$baseMessage("请至少选择一项", "error");
       }
-      const ids = this.selectRows.map((item) => item.id).join();
+      const memberID = this.selectRows.map((item) => item.memberID).join();
       this.$baseConfirm(
         "你确定要删除选中项吗",
         null,
         () => {
-          this.$baseMessage("删除成功！", "success");
+          this.deleteMember(memberID);
         },
         () => {
           alert("点击了取消");

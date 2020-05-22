@@ -29,7 +29,7 @@ service.interceptors.request.use(
     if (process.env.NODE_ENV !== "test") {
       //这里是个坑哦，后端数据接收方式走的是application/x-www-form-urlencoded;charset=UTF-8，大多数公司可能接收方式不是这种
       if (config.data && !config.data.param) {
-        //config.data = qs.stringify(config.data);
+        // config.data = qs.stringify(config.data);
         config.data = JSON.stringify(config.data); //zzz修改接口 2020-05-02
       }
     }

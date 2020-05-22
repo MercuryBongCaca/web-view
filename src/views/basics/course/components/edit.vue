@@ -46,9 +46,7 @@
           :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
           :http-request="handler"
-          :on-success="handleSuccess"
           :on-change="handleChange"
-          :on-error="handleError"
           :limit="1"
           :auto-upload="false"
           :file-list="fileList"
@@ -80,10 +78,7 @@ export default {
       dialogImageUrl: "",
       dialogVisible: false,
       dialogWidth: "340px",
-      courseTypeForm: {
-        courseTypeID: "",
-        courseTypeName: "",
-      },
+      courseTypeForm: [],
       courseForm: {
         courseID: "",
         courseName: "",
@@ -210,15 +205,6 @@ export default {
         GetCourseTypeList()
           .then((response) => {
             const { data } = response;
-            // let obj = [];
-            // response.data.map((item,index) => {
-            //   obj.push({
-            //     key: item.courseTypeID,
-            //     label: item.courseTypeName,
-            //     value: JSON.stringify(item)
-            //   });
-            // })
-            // this.courseTypeForm = obj;
             this.courseTypeForm = response.data;
           })
           .catch((error) => {
@@ -246,20 +232,6 @@ export default {
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
-    },
-    // 文件上传成功时的钩子
-    handleSuccess(res, file, fileList) {
-      this.$notify.success({
-        title: "成功",
-        message: "文件上传成功",
-      });
-    },
-    // 文件上传失败时的钩子
-    handleError(err, file, fileList) {
-      this.$notify.error({
-        title: "错误",
-        message: "文件上传失败",
-      });
     },
     setDialogWidth() {
       var val = document.body.clientWidth;
