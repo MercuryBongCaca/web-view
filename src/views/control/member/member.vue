@@ -96,7 +96,7 @@ export default {
   data() {
     return {
       imgShow: true,
-      imageUrl: process.env.VUE_APP_BASE_API2,
+      imageUrl: process.env.VUE_APP_BASE_FILE,
       listLoading: true,
       layout: "total, sizes, prev, pager, next, jumper",
       total: 0,
