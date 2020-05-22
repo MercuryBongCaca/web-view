@@ -224,7 +224,7 @@ export default {
   data() {
     return {
       activeName: "first",
-      imageUrl: process.env.VUE_APP_BASE_API2,
+      imageUrl: process.env.VUE_APP_BASE_FILE,
       courseList: [],
       coursePriceList: [],
       imgShow: true,
