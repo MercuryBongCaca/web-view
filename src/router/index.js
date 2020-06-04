@@ -57,24 +57,24 @@ export const asyncRoutes = [
         component: () => import("@/views/basics/system/system"),
         meta: { title: "系统设定" },
       },
-      // {
-      //   path: "course",
-      //   name: "Course",
-      //   component: () => import("@/views/basics/course/course"),
-      //   meta: { title: "课程设定" },
-      // },
-      // {
-      //   path: "schedule",
-      //   name: "Schedule",
-      //   component: () => import("@/views/basics/schedule/schedule"),
-      //   meta: { title: "课表设定" },
-      // },
-      // {
-      //   path: "goods",
-      //   name: "Goods",
-      //   component: () => import("@/views/basics/goods/goods"),
-      //   meta: { title: "商品设定" },
-      // },
+      {
+        path: "course",
+        name: "Course",
+        component: () => import("@/views/basics/course/course"),
+        meta: { title: "课程设定" },
+      },
+      {
+        path: "schedule",
+        name: "Schedule",
+        component: () => import("@/views/basics/schedule/schedule"),
+        meta: { title: "课表设定" },
+      },
+      {
+        path: "goods",
+        name: "Goods",
+        component: () => import("@/views/basics/goods/goods"),
+        meta: { title: "商品设定" },
+      },
     ],
   },
   {
@@ -136,6 +136,38 @@ export const asyncRoutes = [
         component: () => import("@/views/control/goods/goods"),
         meta: {
           title: "商品销售",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
+    path: "/class",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/class",
+        name: "Class",
+        component: () => import("@/views/control/class/class"),
+        meta: {
+          title: "预约上课",
+          icon: "user-shield",
+        },
+      },
+    ],
+  },
+  {
+    path: "/leave",
+    component: Layout,
+    redirect: "noRedirect",
+    children: [
+      {
+        path: "/leave",
+        name: "Leave",
+        component: () => import("@/views/control/leave/leave"),
+        meta: {
+          title: "请假",
           icon: "user-shield",
         },
       },
