@@ -6,15 +6,18 @@
       :inline="true"
       @submit.native.prevent
     >
-      <el-form-item>
+      <!-- <el-form-item>
         <el-select v-model="queryForm.status" style="width: 100%;">
           <el-option label="职位" value="0"></el-option>
           <el-option label="店长" value="1"></el-option>
           <el-option label="吉他老师" value="2"></el-option>
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
-        <el-select v-model="queryForm.status" style="width: 100%;">
+        <el-select
+          v-model="queryForm.querycriteria[0].values"
+          style="width: 100%;"
+        >
           <el-option label="在职状态" value="0"></el-option>
           <el-option label="在职" value="1"></el-option>
           <el-option label="离职" value="2"></el-option>
@@ -149,8 +152,14 @@ export default {
       queryForm: {
         pageNo: 1,
         pageSize: 10,
-        name: "",
-        status: "0",
+        querycriteria: [
+          {
+            key: "status",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+        ],
       },
       employeeList: [],
     };
@@ -170,9 +179,13 @@ export default {
     },
     //绑定员工列表
     getEmployeeList(page) {
-      const { pageNo, pageSize, name } = page;
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
       return new Promise((resolve, reject) => {
-        getEmployeeList({ pageNo, pageSize, name })
+        getEmployeeList(selectwhere)
           .then((response) => {
             const { data } = response;
             this.employeeList = response.data;

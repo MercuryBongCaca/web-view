@@ -31,8 +31,9 @@ const mutations = {
 };
 const actions = {
   setEmployeeList({ commit }) {
+    let shopID = "7BB271C7-3A8C-4509-B488-1FE50DC34FC0";
     return new Promise((resolve) => {
-      getEmployee()
+      getEmployee(shopID)
         .then((res) => {
           commit("SET_EMPLOYEELIST", res.data);
         })
@@ -64,8 +65,12 @@ const actions = {
     });
   },
   setPaymentTypeList({ commit }) {
+    let selectwhere = {
+      dictionariesTypeID: "1",
+      shopID: "7BB271C7-3A8C-4509-B488-1FE50DC34FC0",
+    };
     return new Promise((resolve) => {
-      getPaymentTypeList()
+      getPaymentTypeList(selectwhere)
         .then((res) => {
           commit("SET_PAYMENTTYPELIST", res.data);
         })

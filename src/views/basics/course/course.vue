@@ -10,7 +10,10 @@
             @submit.native.prevent
           >
             <el-form-item>
-              <el-input v-model="courseQueryForm.name" placeholder="课程名称" />
+              <el-input
+                v-model="courseQueryForm.querycriteria[0].value"
+                placeholder="课程名称"
+              />
             </el-form-item>
             <el-form-item>
               <el-button
@@ -108,7 +111,10 @@
             @submit.native.prevent
           >
             <el-form-item>
-              <el-input v-model="priceQueryForm.name" placeholder="课程名称" />
+              <el-input
+                v-model="priceQueryForm.querycriteria[0].value"
+                placeholder="课程名称"
+              />
             </el-form-item>
             <el-form-item>
               <el-button
@@ -242,12 +248,26 @@ export default {
       courseQueryForm: {
         pageNo: 1,
         pageSize: 10,
-        name: "",
+        querycriteria: [
+          {
+            key: "courseName",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+        ],
       },
       priceQueryForm: {
         pageNo: 1,
         pageSize: 10,
-        name: "",
+        querycriteria: [
+          {
+            key: "courseName",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+        ],
       },
     };
   },
@@ -270,9 +290,13 @@ export default {
   },
   methods: {
     getCourseList(page) {
-      const { pageNo, pageSize, name } = page;
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
       return new Promise((resolve, reject) => {
-        getCourseList({ pageNo, pageSize, name })
+        getCourseList(selectwhere)
           .then((response) => {
             const { data } = response;
             this.courseList = response.data;
@@ -317,12 +341,15 @@ export default {
       });
     },
     getCoursePriceList(page) {
-      const { pageNo, pageSize, name } = page;
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
       return new Promise((resolve, reject) => {
-        getCoursePriceList({ pageNo, pageSize, name })
+        getCoursePriceList(selectwhere)
           .then((response) => {
             const { data } = response;
-            console.log(response.data);
             this.coursePriceList = response.data;
             this.totalPrice = Number(response.totalCount);
           })

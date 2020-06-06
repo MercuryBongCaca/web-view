@@ -34,8 +34,8 @@
               <div style="width: 50px; height: 50px;">
                 <el-image
                   v-if="imgShow"
-                  :preview-src-list="[scope.row.imgURL]"
-                  :src="scope.row.imgURL"
+                  :preview-src-list="[imageUrl + scope.row.picturePath]"
+                  :src="imageUrl + scope.row.picturePath"
                   style="width: 50px; height: 50px;"
                 ></el-image>
               </div>
@@ -78,16 +78,16 @@
       </el-col>
     </el-row>
     <el-divider content-position="left"> <h4>合同基本信息</h4></el-divider>
-    <el-form label-width="80px">
+    <el-form ref="form" :model="form" :rules="formRules" label-width="80px">
       <el-row :gutter="24">
         <el-col :span="12">
           <el-form-item label="课程名称">
-            <el-select v-model="form.CourseID" filterable placeholder="请选择">
+            <el-select v-model="form.courseID" filterable placeholder="请选择">
               <el-option
                 v-for="item in courseList"
-                :key="item.CourseID"
-                :label="item.Name"
-                :value="item.CourseID"
+                :key="item.courseID"
+                :label="item.courseName"
+                :value="item.courseID"
               >
               </el-option>
             </el-select>
@@ -96,15 +96,15 @@
         <el-col :span="12">
           <el-form-item label="上课老师">
             <el-select
-              v-model="form.EmployeeID"
+              v-model="form.employeeIDTeacher"
               filterable
               placeholder="请选择"
             >
               <el-option
                 v-for="item in employeeList"
-                :key="item.EmployeeID"
-                :label="item.Name"
-                :value="item.EmployeeID"
+                :key="item.employeeID"
+                :label="item.name"
+                :value="item.employeeID"
               >
               </el-option>
             </el-select>
@@ -112,21 +112,24 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="课程数量">
-            <el-input v-model="form.Number" autocomplete="off"></el-input>
+            <el-input
+              v-model="form.purchaseNumber"
+              autocomplete="off"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="销售人">
             <el-select
-              v-model="form.SaleEmployeeID"
+              v-model="form.employeeIDsale"
               filterable
               placeholder="请选择"
             >
               <el-option
                 v-for="item in employeeList"
-                :key="item.EmployeeID"
-                :label="item.Name"
-                :value="item.EmployeeID"
+                :key="item.employeeID"
+                :label="item.name"
+                :value="item.employeeID"
               >
               </el-option>
             </el-select>
@@ -135,7 +138,7 @@
         <el-col :span="12">
           <el-form-item label="合同开始">
             <el-date-picker
-              v-model="form.StartTime"
+              v-model="form.contractStartTime"
               type="date"
               placeholder="选择日期"
             >
@@ -145,7 +148,7 @@
         <el-col :span="12">
           <el-form-item label="合同结束">
             <el-date-picker
-              v-model="form.EndTime"
+              v-model="form.contractEndTime"
               type="date"
               placeholder="选择日期"
             >
@@ -155,21 +158,46 @@
         <el-col :span="12">
           <el-form-item label="合同金额">
             <el-input
-              v-model="form.BasePrice"
-              :disabled="true"
+              v-model="form.amountPayable"
               autocomplete="off"
             ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="最终收款">
-            <el-input v-model="form.FinalPrice" autocomplete="off"></el-input>
+            <el-input
+              v-model="form.transactionPrice"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="状态">
+            <el-select
+              v-model="form.status"
+              style="width: 100%;"
+              placeholder="请选择状态"
+            >
+              <el-option :key="1" label="正常" :value="1"></el-option>
+              <el-option :key="2" label="已过期" :value="2"></el-option>
+              <el-option :key="3" label="正在执行" :value="3"></el-option>
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="24">
           <el-form-item label="备注">
             <el-input
-              v-model="form.Remark"
+              v-model="form.remarks"
+              type="textarea"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="店铺备注">
+            <el-input
+              v-model="form.storeNotes"
               type="textarea"
               :autosize="{ minRows: 2, maxRows: 4 }"
             >
@@ -181,13 +209,18 @@
 
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="save">保 存</el-button>
+      <el-button type="primary" @click="save('form')">保 存</el-button>
     </div>
   </el-dialog>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+import {
+  GetContractMemberList,
+  InsertContract,
+  UpdateContract,
+} from "@/api/contract";
 export default {
   name: "ContractEdit",
   filters: {
@@ -205,27 +238,12 @@ export default {
       searchMember: {
         nameMobile: "",
       },
+      imageUrl: process.env.VUE_APP_BASE_FILE,
       form: {
-        ContractID: "",
-        MemberID: "",
-        CourseID: "",
-        ContractNo: "",
-        Number: "",
-        EmployeeID: "",
-        SaleEmployeeID: "",
-        Status: "",
-        BasePrice: "",
-        PaidPrice: "",
-        CreatetTime: "",
-        StartTime: new Date(),
-        EndTime: "",
-        Remark: "",
-        ShopID: "",
-        IsDeleted: "",
-        upTime: "",
-        upUser: "",
+        contractID: "",
       },
       selectedMember: {
+        memberID: "",
         name: "",
         mobile: "",
       },
@@ -266,6 +284,7 @@ export default {
           timestamp: "2018-04-03 20:46",
         },
       ],
+      shopID: "7BB271C7-3A8C-4509-B488-1FE50DC34FC0",
       imgShow: true,
       elementLoadingText: "正在加载...",
       tabPosition: "left",
@@ -276,7 +295,9 @@ export default {
   computed: {
     ...mapGetters(["employeeList", "courseList"]),
   },
-  created() {},
+  created() {
+    this.GetContractMemberList(this.searchMember.nameMobile);
+  },
   beforeDestroy() {
     $("body").off("click");
   },
@@ -292,15 +313,43 @@ export default {
 
   methods: {
     handleCurrentChange(val) {
+      this.selectedMember.memberID = val.memberID;
       this.selectedMember.name = val.name;
       this.selectedMember.mobile = val.mobile;
     },
-    getMemberList() {},
-    showEdit(row) {
-      if (!row) {
+    //点击查询
+    getMemberList() {
+      this.GetContractMemberList(this.searchMember.nameMobile);
+    },
+    //绑定会员列表下拉框
+    GetContractMemberList(memberName) {
+      let data = {
+        shopID: this.shopID,
+        memberName: memberName,
+      };
+      return new Promise((resolve, reject) => {
+        GetContractMemberList(data)
+          .then((response) => {
+            const { data } = response;
+            this.memberList = response.data;
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    showEdit(contract) {
+      if (!contract) {
         this.title = "新增合同";
+        this.form = {
+          contractID: "",
+        };
       } else {
         this.title = "合同详情";
+        this.form = JSON.parse(JSON.stringify(contract));
+        this.selectedMember.memberID = this.form.memberID;
+        this.selectedMember.name = this.form.memberName;
+        this.selectedMember.mobile = this.form.memberMobile;
       }
       this.dialogFormVisible = true;
     },
@@ -310,8 +359,58 @@ export default {
     handleDelete(index, row) {
       console.log(index, row);
     },
-    save() {
-      this.dialogFormVisible = false;
+    save(formName) {
+      let self = this;
+      self.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (self.form.contractID != "") {
+            self.UpdateContract(self.form);
+          } else {
+            self.InsertContract(self.form);
+          }
+          self.dialogFormVisible = false;
+        }
+      });
+    },
+    //添加合同
+    InsertContract(contractForm) {
+      let that = this;
+      contractForm.memberID = that.selectedMember.memberID;
+      return new Promise((resolve, reject) => {
+        InsertContract(contractForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("添加成功", "success");
+              that.$emit("resetSearch");
+            } else {
+              that.$baseMessage("添加失败", "success");
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //修改合同
+    UpdateContract(contractForm) {
+      let that = this;
+      contractForm.memberID = that.selectedMember.memberID;
+      return new Promise((resolve, reject) => {
+        UpdateContract(contractForm)
+          .then((response) => {
+            const { data } = response;
+            if (data == 1) {
+              that.$baseMessage("修改成功", "success");
+              that.$emit("resetSearch");
+            } else {
+              that.$baseMessage("修改失败", "success");
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
     },
   },
 };

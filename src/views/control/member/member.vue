@@ -7,14 +7,17 @@
       @submit.native.prevent
     >
       <el-form-item>
-        <el-input v-model="queryForm.name" placeholder="姓名/手机号" />
+        <el-input
+          v-model="queryForm.querycriteria[0].values"
+          placeholder="姓名/手机号"
+        />
       </el-form-item>
       <el-form-item>
         <el-button
           icon="el-icon-search"
           type="primary"
           native-type="submit"
-          @click="handleQuery"
+          @click="selectmember"
           >查询
         </el-button>
       </el-form-item>
@@ -107,8 +110,14 @@ export default {
       queryForm: {
         pageNo: 1,
         pageSize: 10,
-        name: "",
-        status: "0",
+        querycriteria: [
+          {
+            key: "name",
+            values: "",
+            type: "string",
+            like: "1",
+          },
+        ],
       },
       memberList: [],
     };
@@ -128,9 +137,13 @@ export default {
     },
     //绑定会员列表
     getMemberList(page) {
-      const { pageNo, pageSize, name } = page;
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
       return new Promise((resolve, reject) => {
-        getMemberList({ pageNo, pageSize, name })
+        getMemberList(selectwhere)
           .then((response) => {
             const { data } = response;
             this.memberList = response.data;
@@ -187,10 +200,6 @@ export default {
     },
     handleCurrentChange(val) {
       this.queryForm.pageNo = val;
-      this.fetchData();
-    },
-    handleQuery() {
-      this.queryForm.pageNo = 1;
       this.fetchData();
     },
     fetchData() {

@@ -10,39 +10,39 @@
         >
           <el-form-item>
             <el-select
-              v-model="queryForm.CourseID"
+              v-model="queryForm.querycriteria[0].values"
               filterable
               clearable
               placeholder="课程选择"
             >
               <el-option
                 v-for="item in courseList"
-                :key="item.CourseID"
-                :label="item.Name"
-                :value="item.CourseID"
+                :key="item.courseID"
+                :label="item.courseName"
+                :value="item.courseID"
               >
               </el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
             <el-select
-              v-model="queryForm.EmployeeID"
+              v-model="queryForm.querycriteria[1].values"
               filterable
               clearable
               placeholder="上课老师"
             >
               <el-option
                 v-for="item in employeeList"
-                :key="item.EmployeeID"
-                :label="item.Name"
-                :value="item.EmployeeID"
+                :key="item.employeeID"
+                :label="item.name"
+                :value="item.employeeID"
               >
               </el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
             <el-input
-              v-model="queryForm.NameMobile"
+              v-model="queryForm.querycriteria[2].values"
               placeholder="会员姓名/手机号"
             />
           </el-form-item>
@@ -73,29 +73,32 @@
           @selection-change="setSelectRows"
         >
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column label="姓名" prop="Name"></el-table-column>
-          <el-table-column label="手机号" prop="Mobile"></el-table-column>
-          <el-table-column label="课程名称" prop="CourseName"></el-table-column>
-          <el-table-column label="合同编号" prop="ContractNo"></el-table-column>
-          <el-table-column label="余课数" prop="Number"></el-table-column>
+          <el-table-column label="姓名" prop="memberName"></el-table-column>
+          <el-table-column label="手机号" prop="memberMobile"></el-table-column>
+          <el-table-column label="课程名称" prop="courseName"></el-table-column>
+          <el-table-column label="合同编号" prop="contractNo"></el-table-column>
+          <el-table-column
+            label="余课数"
+            prop="purchaseNumber"
+          ></el-table-column>
           <el-table-column
             label="上课老师"
-            prop="EmployeeName"
+            prop="employeeNameTeacher"
           ></el-table-column>
           <el-table-column class-name="status-col" label="合同状态">
             <template slot-scope="scope">
-              <el-tag :type="scope.row.StatusName | statusFilter"
-                >{{ scope.row.StatusName }}
+              <el-tag :type="scope.row.statusName | statusFilter"
+                >{{ scope.row.statusName }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
             label="办理日期"
-            prop="CreatetTime"
+            prop="handlingTime"
           ></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="handleEdit(scope.row)"
+              <el-button type="text" @click="handleEdit(scope)"
                 >编辑
               </el-button>
             </template>
@@ -110,7 +113,7 @@
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
         ></el-pagination>
-        <edit ref="edit"></edit>
+        <edit ref="edit" @resetSearch="handleQuery"></edit>
       </el-tab-pane>
       <el-tab-pane label="合同收款" name="second">
         <el-row :gutter="20">
@@ -118,26 +121,26 @@
             <el-card class="box-card">
               <h3>待付款合同</h3>
               <br />
-              <el-form :model="queryForm" :inline="true">
+              <el-form :model="queryPaymentForm" :inline="true">
                 <el-form-item label="办理日期">
                   <el-date-picker
-                    v-model="queryPaymentForm.CreatetTime"
-                    type="dates"
-                    placeholder="选择一个或多个日期"
+                    v-model="queryPaymentForm.querycriteria[1].values"
+                    type="date"
+                    placeholder="选择日期"
                   >
                   </el-date-picker>
                 </el-form-item>
                 <el-form-item label="课程名称">
                   <el-select
-                    v-model="queryPaymentForm.CourseID"
+                    v-model="queryPaymentForm.querycriteria[0].values"
                     clearable
                     placeholder="课程名称"
                   >
                     <el-option
                       v-for="item in courseList"
-                      :key="item.CourseID"
-                      :label="item.Name"
-                      :value="item.CourseID"
+                      :key="item.courseID"
+                      :label="item.courseName"
+                      :value="item.courseID"
                     >
                     </el-option>
                   </el-select>
@@ -147,6 +150,7 @@
                     icon="el-icon-search"
                     type="primary"
                     native-type="submit"
+                    @click="handlePaymentQuery"
                     >查询
                   </el-button>
                 </el-form-item>
@@ -159,28 +163,34 @@
                 :height="height"
                 @current-change="paymentSelect"
               >
-                <el-table-column label="姓名" prop="Name"></el-table-column>
-                <el-table-column label="手机号" prop="Mobile"></el-table-column>
+                <el-table-column
+                  label="姓名"
+                  prop="memberName"
+                ></el-table-column>
+                <el-table-column
+                  label="手机号"
+                  prop="memberMobile"
+                ></el-table-column>
                 <el-table-column
                   label="课程名称"
-                  prop="CourseName"
+                  prop="courseName"
                 ></el-table-column>
                 <el-table-column
                   label="合同编号"
-                  prop="ContractNo"
+                  prop="contractNo"
                 ></el-table-column>
                 <el-table-column
                   label="应付金额"
-                  prop="BasePrice"
+                  prop="amountPayable"
                 ></el-table-column>
                 <el-table-column label="尚欠金额">
                   <template slot-scope="scope">
-                    {{ scope.row.BasePrice - scope.row.PaidPrice }}
+                    {{ scope.row.amountPayable - scope.row.amountPaid }}
                   </template>
                 </el-table-column>
                 <el-table-column
                   label="办理日期"
-                  prop="CreatetTime"
+                  prop="handlingTime"
                 ></el-table-column>
               </el-table>
             </el-card>
@@ -190,29 +200,32 @@
               <h3>合同信息</h3>
 
               <div style="padding: 20px; height: 150px;">
-                <table v-if="selectPayment.Mobile">
+                <table v-if="selectPayment.memberMobile">
                   <tr>
                     <td>
                       <el-image
                         style="width: 100px; height: 100px;"
-                        :src="selectPayment.imgURL"
-                        :preview-src-list="[selectPayment.imgURL]"
+                        :src="imageUrl + selectPayment.memberPicturePath"
+                        :preview-src-list="[
+                          imageUrl + selectPayment.memberPicturePath,
+                        ]"
                       >
                       </el-image>
                     </td>
                     <td style="padding-top: 60px; padding-left: 10px;">
                       <h3>
-                        {{ selectPayment.Name }}
+                        {{ selectPayment.memberName }}
                         <i
                           :class="
-                            selectPayment.Sex == 1
+                            selectPayment.memberSex == 1
                               ? 'el-icon-male'
                               : 'el-icon-female'
                           "
                         ></i>
                       </h3>
                       <h4 style="padding-top: 10px;">
-                        <i class="el-icon-phone"></i> {{ selectPayment.Mobile }}
+                        <i class="el-icon-phone"></i>
+                        {{ selectPayment.memberMobile }}
                       </h4>
                     </td>
                   </tr>
@@ -223,7 +236,7 @@
                   <el-col :span="12">
                     <el-form-item label="合同编号">
                       <el-input
-                        v-model="selectPayment.ContractNo"
+                        v-model="selectPayment.contractNo"
                         autocomplete="off"
                       ></el-input>
                     </el-form-item>
@@ -231,7 +244,7 @@
                   <el-col :span="12">
                     <el-form-item label="合同状态">
                       <el-select
-                        v-model="selectPayment.Status"
+                        v-model="selectPayment.status"
                         filterable
                         placeholder="请选择"
                       >
@@ -248,15 +261,15 @@
                   <el-col :span="12">
                     <el-form-item label="课程名称">
                       <el-select
-                        v-model="selectPayment.CourseID"
+                        v-model="selectPayment.courseID"
                         filterable
                         placeholder="请选择"
                       >
                         <el-option
                           v-for="item in courseList"
-                          :key="item.CourseID"
-                          :label="item.Name"
-                          :value="item.CourseID"
+                          :key="item.courseID"
+                          :label="item.courseName"
+                          :value="item.courseID"
                         >
                         </el-option>
                       </el-select>
@@ -265,7 +278,7 @@
                   <el-col :span="12">
                     <el-form-item label="课程数量">
                       <el-input
-                        v-model="selectPayment.Number"
+                        v-model="selectPayment.purchaseNumber"
                         autocomplete="off"
                       ></el-input>
                     </el-form-item>
@@ -273,15 +286,15 @@
                   <el-col :span="12">
                     <el-form-item label="上课老师">
                       <el-select
-                        v-model="selectPayment.EmployeeID"
+                        v-model="selectPayment.employeeIDTeacher"
                         filterable
                         placeholder="请选择"
                       >
                         <el-option
                           v-for="item in employeeList"
-                          :key="item.EmployeeID"
-                          :label="item.Name"
-                          :value="item.EmployeeID"
+                          :key="item.employeeID"
+                          :label="item.name"
+                          :value="item.employeeID"
                         >
                         </el-option>
                       </el-select>
@@ -290,15 +303,15 @@
                   <el-col :span="12">
                     <el-form-item label="销售人">
                       <el-select
-                        v-model="selectPayment.SaleEmployeeID"
+                        v-model="selectPayment.employeeIDsale"
                         filterable
                         placeholder="请选择"
                       >
                         <el-option
                           v-for="item in employeeList"
-                          :key="item.EmployeeID"
-                          :label="item.Name"
-                          :value="item.EmployeeID"
+                          :key="item.employeeID"
+                          :label="item.name"
+                          :value="item.employeeID"
                         >
                         </el-option>
                       </el-select>
@@ -307,7 +320,7 @@
                   <el-col :span="12">
                     <el-form-item label="合同开始">
                       <el-input
-                        v-model="selectPayment.StartTime"
+                        v-model="selectPayment.contractStartTime"
                         autocomplete="off"
                       ></el-input>
                     </el-form-item>
@@ -315,7 +328,7 @@
                   <el-col :span="12">
                     <el-form-item label="合同结束">
                       <el-input
-                        v-model="selectPayment.EndTime"
+                        v-model="selectPayment.contractEndTime"
                         autocomplete="off"
                       ></el-input>
                     </el-form-item>
@@ -323,7 +336,7 @@
                   <el-col :span="12">
                     <el-form-item label="合同金额">
                       <el-input-number
-                        v-model="selectPayment.BasePrice"
+                        v-model="selectPayment.amountPayable"
                         autocomplete="off"
                         :controls="false"
                         :disabled="true"
@@ -333,7 +346,7 @@
                   <el-col :span="12">
                     <el-form-item label="已付金额">
                       <el-input-number
-                        v-model="selectPayment.PaidPrice"
+                        v-model="selectPayment.amountPaid"
                         autocomplete="off"
                         :controls="false"
                         :disabled="true"
@@ -345,7 +358,7 @@
                     <el-form-item label="尚欠金额">
                       <el-input-number
                         :value="
-                          selectPayment.BasePrice - selectPayment.PaidPrice
+                          selectPayment.amountPayable - selectPayment.amountPaid
                         "
                         autocomplete="off"
                         :controls="false"
@@ -365,7 +378,7 @@
                   <el-col :span="12">
                     <el-form-item label="付款日">
                       <el-date-picker
-                        v-model="paymentInfo.PaymentTime"
+                        v-model="paymentInfo.paymentDate"
                         type="date"
                         placeholder="选择日期"
                       >
@@ -375,9 +388,7 @@
                   <el-col :span="12">
                     <el-form-item label="应付金额">
                       <el-input-number
-                        :value="
-                          selectPayment.BasePrice - selectPayment.PaidPrice
-                        "
+                        :value="selectPayment.amountPayable"
                         autocomplete="off"
                         :controls="false"
                         :disabled="true"
@@ -398,9 +409,7 @@
                     <el-form-item label="尚欠金额">
                       <el-input-number
                         :value="
-                          selectPayment.BasePrice -
-                          selectPayment.PaidPrice -
-                          paymentInfo.PaidPrice
+                          selectPayment.amountPayable - selectPayment.amountPaid
                         "
                         autocomplete="off"
                         :controls="false"
@@ -411,14 +420,14 @@
                   <el-col :span="12">
                     <el-form-item label="支付方式">
                       <el-select
-                        v-model="paymentInfo.PaymentMode"
+                        v-model="paymentInfo.paymentMethod"
                         placeholder="请选择"
                       >
                         <el-option
                           v-for="item in paymentTypeList"
-                          :key="item.Code"
-                          :label="item.Name"
-                          :value="item.Code"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id"
                         >
                         </el-option>
                       </el-select>
@@ -427,7 +436,7 @@
                   <el-col :span="12">
                     <el-form-item label="付款金额">
                       <el-input-number
-                        v-model="paymentInfo.PaidPrice"
+                        v-model="paymentInfo.payMoney"
                         autocomplete="off"
                         :controls="false"
                       ></el-input-number>
@@ -437,7 +446,7 @@
                   <el-col :span="24">
                     <el-form-item label="备注">
                       <el-input
-                        v-model="paymentInfo.Remark"
+                        v-model="paymentInfo.remarks"
                         type="textarea"
                         :autosize="{ minRows: 2, maxRows: 4 }"
                       >
@@ -445,7 +454,10 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-button type="primary" native-type="submit"
+                    <el-button
+                      type="primary"
+                      native-type="submit"
+                      @click="savepayment()"
                       >确定付款
                     </el-button>
                   </el-col>
@@ -461,6 +473,12 @@
 
 <script>
 import checkPermission from "@/utils/permission";
+import {
+  getContractList,
+  deleteContract,
+  getContractListPaymentList,
+  ContractPayment,
+} from "@/api/contract";
 import { mapGetters } from "vuex";
 import Edit from "./components/edit";
 
@@ -482,6 +500,7 @@ export default {
   data() {
     return {
       value4: "",
+      imageUrl: process.env.VUE_APP_BASE_FILE,
       activeName: "first",
       imgShow: true,
       listLoading: true,
@@ -494,84 +513,55 @@ export default {
       queryForm: {
         pageNo: 1,
         pageSize: 10,
-        CourseID: "",
-        EmployeeID: "",
-        NameMobile: "",
+        querycriteria: [
+          {
+            key: "courseID",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+          {
+            key: "employeeIDTeacher",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+          {
+            key: "memberName",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+        ],
       },
       queryPaymentForm: {
-        CreatetTime: [new Date()],
-        CourseID: "",
+        pageNo: 1,
+        pageSize: 10,
+        querycriteria: [
+          {
+            key: "courseID",
+            values: "",
+            type: "string",
+            like: "0",
+          },
+          {
+            key: "handlingTime",
+            values: "",
+            type: "datetime",
+            like: "0",
+          },
+          {
+            key: "handlingTime",
+            values: "",
+            type: "datetime",
+            like: "1",
+          },
+        ],
       },
-      contractList: [
-        {
-          EmployeeID: "",
-          Name: "张三",
-          Mobile: "13035961201",
-          ContractNo: "No1233001",
-          CourseID: "1",
-          CourseName: "初级吉他课",
-          Number: "1",
-          EmployeeName: "张老师",
-          EmployeeID: "1",
-          StatusName: "正常",
-          CreatetTime: "2020-1-2",
-        },
-      ],
-      paymentList: [
-        {
-          SaleEmployeeID: "1",
-          Name: "张三",
-          Status: "2",
-          Sex: 1,
-          Mobile: "13035961201",
-          ContractNo: "No1233001",
-          CourseID: "1",
-          CourseName: "初级吉他课",
-          Number: "1",
-          EmployeeName: "张老师",
-          EmployeeID: "2",
-          BasePrice: 3000,
-          PaidPrice: 100,
-          CreatetTime: "2020-1-2",
-          StartTime: "2020-1-2",
-          EndTime: "2021-1-2",
-          imgURL: "https://i.picsum.photos/id/25/200/300.jpg?2",
-        },
-        {
-          SaleEmployeeID: "3",
-          Name: "李四",
-          Status: "2",
-          Sex: 2,
-          Mobile: "16035961201",
-          ContractNo: "No1233009",
-          CourseID: "2",
-          CourseName: "架子鼓课",
-          Number: "7",
-          EmployeeName: "李老师",
-          EmployeeID: "1",
-          BasePrice: 2700,
-          PaidPrice: 0,
-          CreatetTime: "2020-2-6",
-          StartTime: "2020-2-6",
-          EndTime: "2021-2-6",
-          imgURL: "https://i.picsum.photos/id/26/300/300.jpg?2",
-        },
-      ],
+      contractList: [],
+      paymentList: [],
       selectPayment: {},
-      paymentInfo: {
-        PaymentID: "",
-        ContractID: "",
-        GoodsOrderID: "",
-        PaidPrice: 0,
-        PaymentMode: "",
-        PaymentType: "",
-        PaymentTime: new Date(),
-        ShopID: "",
-        IsDeleted: "",
-        Remark: "",
-        upTime: "",
-        upUser: "",
-      },
+      paymentInfo: {},
     };
   },
 
@@ -590,12 +580,94 @@ export default {
     this.$store.dispatch("baseData/setCourseList");
     this.$store.dispatch("baseData/setContractStatusList");
     this.$store.dispatch("baseData/setPaymentTypeList");
+    this.getContractList(this.queryForm);
+    this.getContractListPaymentList(this.queryPaymentForm);
   },
   beforeDestroy() {
     $("body").off("click");
   },
   mounted() {},
   methods: {
+    //绑定合同列表
+    getContractList(page) {
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
+      return new Promise((resolve, reject) => {
+        getContractList(selectwhere)
+          .then((response) => {
+            const { data } = response;
+            this.contractList = response.data;
+            this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //删除合同列表
+    deleteContract(contractID) {
+      return new Promise((resolve, reject) => {
+        deleteContract(contractID)
+          .then((response) => {
+            const { data } = response;
+            this.$baseMessage("删除成功！", "success");
+            this.getContractList(this.queryForm);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //绑定合同收款
+    getContractListPaymentList(page) {
+      let selectwhere = {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        where: page.querycriteria,
+      };
+      return new Promise((resolve, reject) => {
+        getContractListPaymentList(selectwhere)
+          .then((response) => {
+            const { data } = response;
+            this.paymentList = response.data;
+            // this.total = Number(response.totalCount);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //合同付款
+    ContractPayment(contractForm) {
+      let that = this;
+      return new Promise((resolve, reject) => {
+        ContractPayment(contractForm)
+          .then((response) => {
+            const { data } = response;
+            debugger;
+            if (data == 1) {
+              that.$baseMessage("付款成功", "success");
+              that.paymentInfo = {};
+              that.selectPayment = {};
+            } else {
+              that.$baseMessage("付款失败", "success");
+            }
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    //付款
+    savepayment() {
+      let self = this;
+      self.paymentInfo.contractID = self.selectPayment.contractID;
+      self.paymentInfo.shopID = self.selectPayment.contractID;
+      self.ContractPayment(self.paymentInfo);
+    },
     paymentSelect(val) {
       this.selectPayment = val;
     },
@@ -608,18 +680,19 @@ export default {
       this.$refs["edit"].showEdit();
     },
     handleEdit(row) {
-      this.$refs["edit"].showEdit(row);
+      let contract = row.row;
+      this.$refs["edit"].showEdit(contract);
     },
     handleDelete() {
       if (this.selectRows.length === 0) {
         return this.$baseMessage("请至少选择一项", "error");
       }
-      const ids = this.selectRows.map((item) => item.id).join();
+      const contractID = this.selectRows.map((item) => item.contractID).join();
       this.$baseConfirm(
         "你确定要删除选中项吗",
         null,
         () => {
-          this.$baseMessage("删除成功！", "success");
+          this.deleteContract(contractID);
         },
         () => {
           alert("点击了取消");
@@ -634,9 +707,13 @@ export default {
       this.queryForm.pageNo = val;
       this.fetchData();
     },
+    //条件查询合同
     handleQuery() {
-      this.queryForm.pageNo = 1;
-      this.fetchData();
+      this.getContractList(this.queryForm);
+    },
+    //条件查询收款合同
+    handlePaymentQuery() {
+      this.getContractListPaymentList(this.queryPaymentForm);
     },
     fetchData() {
       this.listLoading = true;

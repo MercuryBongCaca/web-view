@@ -1,21 +1,26 @@
 import request from "@/utils/request";
+var headers = {
+  "Content-Type": "application/json;charset=utf-8",
+};
 
-export function getEmployee() {
+export function getEmployee(data) {
   return request({
-    url: "/employee/getlist",
+    url: "api/Employee/GetEmployeeSelectList",
     method: "post",
+    data: data,
+    headers: headers,
   });
 }
 export function getAreaList() {
   return request({
-    url: "/area/getlist",
+    url: "/api/Area/AreaList",
     method: "post",
   });
 }
 export function getCourseList() {
   return request({
-    url: "/course/getlist",
-    method: "post",
+    url: "/api/Course/CourseSelectList",
+    method: "get",
   });
 }
 export function getTemplateList() {
@@ -24,10 +29,12 @@ export function getTemplateList() {
     method: "post",
   });
 }
-export function getPaymentTypeList() {
+export function getPaymentTypeList(data) {
   return request({
-    url: "/system/getPaymentType",
+    url: "/api/Dictionaries/DictionariesList",
     method: "post",
+    data: data,
+    headers: headers,
   });
 }
 export function getContractStatusList() {
