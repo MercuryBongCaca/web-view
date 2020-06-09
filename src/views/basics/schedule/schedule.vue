@@ -1,145 +1,159 @@
 <template>
   <div class="table-container">
-    <el-tabs v-model="activeName" class="system_tabs">
-      <el-tab-pane label="生成课表" name="schedule">
-        <div class="block" style="width: 98%;">
+    <el-form ref="form" label-width="auto">
+      <el-tabs v-model="activeName" class="system_tabs">
+        <el-tab-pane label="生成课表" name="schedule">
+          <div class="block" style="width: 98%;">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="模板选择">
+                  <el-select
+                    v-model="settingData.TemplateID"
+                    class="zq_m_c"
+                    style="width: 300px;"
+                    @change="templateChangeA"
+                  >
+                    <el-option label="选择模板" value="0"></el-option>
+                    <el-option
+                      v-for="item in templateList"
+                      :key="item.TemplateID"
+                      :label="item.Name"
+                      :value="item.TemplateID"
+                    ></el-option>
+                  </el-select>
+                  <el-button
+                    v-show="settingData.Type == 2"
+                    icon="el-icon-plus"
+                    type="primary"
+                    @click="listDataAdd"
+                    >加列
+                  </el-button>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-switch
+                  v-model="settingData.editShow"
+                  active-text="启动编辑"
+                >
+                </el-switch>
+              </el-col>
+            </el-row>
+          </div>
+          <class-tempalte ref="classtempalte"></class-tempalte>
           <el-row :gutter="20">
-            <el-col :span="12">
-              <span class="demonstration">模板选择</span>
-              <el-select
-                v-model="settingData.TemplateID"
+            <el-col :span="24" align="right">
+              <span class="demonstration">生成日期</span>
+              <el-date-picker
+                v-model="timeRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
                 class="zq_m_c"
-                @change="templateChangeA"
               >
-                <el-option label="选择模板" value="0"></el-option>
-                <el-option
-                  v-for="item in templateList"
-                  :key="item.TemplateID"
-                  :label="item.Name"
-                  :value="item.TemplateID"
-                ></el-option>
-              </el-select>
-              <el-button
-                v-show="settingData.Type == 2"
-                icon="el-icon-plus"
-                type="primary"
-                @click="listDataAdd"
-                >加列
+              </el-date-picker>
+              <el-button icon="el-icon-edit" type="primary"
+                >生成课表
               </el-button>
             </el-col>
-            <el-col :span="12" align="right">
-              <el-switch v-model="settingData.editShow" active-text="启动编辑">
-              </el-switch>
-            </el-col>
           </el-row>
-        </div>
-        <class-tempalte ref="classtempalte"></class-tempalte>
-        <el-row :gutter="20">
-          <el-col :span="24" align="right">
-            <span class="demonstration">生成日期</span>
-            <el-date-picker
-              v-model="timeRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              class="zq_m_c"
-            >
-            </el-date-picker>
-            <el-button icon="el-icon-edit" type="primary">生成课表 </el-button>
-          </el-col>
-        </el-row>
-      </el-tab-pane>
+        </el-tab-pane>
 
-      <el-tab-pane label="模板设定" name="template">
-        <div class="block" style="width: 98%;">
-          <el-row :gutter="20">
-            <el-col :span="15">
-              <span v-show="settingData2.templateAdd" class="demonstration"
-                >模板选择</span
-              >
-              <el-select
-                v-show="settingData2.templateAdd"
-                v-model="settingData2.TemplateID"
-                class="zq_m_c"
-                @change="templateChangeB"
-              >
-                <el-option label="选择模板" value="0"></el-option>
-                <el-option
-                  v-for="item in templateList"
-                  :key="item.TemplateID"
-                  :label="item.Name"
-                  :value="item.TemplateID"
-                ></el-option>
-              </el-select>
-              <span class="demonstration">编课方式</span>
-              <el-select
-                v-model="settingData2.Type"
-                :disabled="settingData2.templateAdd"
-                class="zq_m_c"
-                @click.native="open1"
-              >
-                <el-option label="按周编课" :value="1"></el-option>
-                <el-option label="按天编课" :value="2"></el-option>
-              </el-select>
-              <el-button
-                v-show="settingData2.Type == 2"
-                icon="el-icon-plus"
-                type="primary"
-                @click="listDataAdd"
-                >加列
-              </el-button>
-            </el-col>
-            <el-col align="right" :span="9">
-              <el-switch
-                v-model="settingData2.templateAdd"
-                active-color="#ff4949"
-                inactive-color="#13ce66"
-                active-text="修改原模板"
-                inactive-text="新增新模板"
-              >
-              </el-switch
-            ></el-col>
+        <el-tab-pane label="模板设定" name="template">
+          <div class="block" style="width: 98%;">
+            <el-row :gutter="20">
+              <el-col :span="5">
+                <el-form-item
+                  v-show="settingData2.templateAdd"
+                  label="模板选择"
+                >
+                  <el-select
+                    v-show="settingData2.templateAdd"
+                    v-model="settingData2.TemplateID"
+                    @change="templateChangeB"
+                  >
+                    <el-option label="选择模板" value="0"></el-option>
+                    <el-option
+                      v-for="item in templateList"
+                      :key="item.TemplateID"
+                      :label="item.Name"
+                      :value="item.TemplateID"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="5">
+                <el-form-item label="编课方式">
+                  <el-select
+                    v-model="settingData2.Type"
+                    :disabled="settingData2.templateAdd"
+                    @click.native="open1"
+                  >
+                    <el-option label="按周编课" :value="1"></el-option>
+                    <el-option label="按天编课" :value="2"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="5">
+                <el-button
+                  v-show="settingData2.Type == 2"
+                  icon="el-icon-plus"
+                  type="primary"
+                  @click="listDataAdd"
+                  >加列
+                </el-button>
+              </el-col>
+              <el-col :span="24">
+                <el-switch
+                  v-model="settingData2.templateAdd"
+                  active-color="#ff4949"
+                  inactive-color="#13ce66"
+                  active-text="修改原模板"
+                  inactive-text="新增新模板"
+                >
+                </el-switch
+              ></el-col>
+            </el-row>
+          </div>
+          <class-tempalte ref="classtempalte2"></class-tempalte>
+          <el-row class="rowheader">
+            <el-input
+              v-model="templateName"
+              placeholder="模板名称"
+              style="width: 13rem;"
+              maxlength="15"
+              class="zq_m_c"
+            />
+            <el-button icon="el-icon-edit" type="primary" @click="templateSave"
+              >保存模板
+            </el-button>
+            <el-button
+              v-show="settingData2.templateAdd && eidtBtnShow"
+              icon="el-icon-edit"
+              type="primary"
+              @click="templateSave"
+              >存为新模板
+            </el-button>
+            <el-button
+              v-show="settingData2.templateAdd && eidtBtnShow"
+              icon="el-icon-delete"
+              type="danger"
+              @click="templateDelete"
+              >删除模板
+            </el-button>
           </el-row>
-        </div>
-        <class-tempalte ref="classtempalte2"></class-tempalte>
-        <el-row class="rowheader">
-          <el-input
-            v-model="templateName"
-            placeholder="模板名称"
-            style="width: 13rem;"
-            maxlength="15"
+        </el-tab-pane>
+        <el-tab-pane label="样式设定" name="templateStyle">
+          <el-switch
+            v-model="cardStyle.showImg"
+            active-text="显示课程图片"
             class="zq_m_c"
-          />
-          <el-button icon="el-icon-edit" type="primary" @click="templateSave"
-            >保存模板
-          </el-button>
-          <el-button
-            v-show="settingData2.templateAdd && eidtBtnShow"
-            icon="el-icon-edit"
-            type="primary"
-            @click="templateSave"
-            >存为新模板
-          </el-button>
-          <el-button
-            v-show="settingData2.templateAdd && eidtBtnShow"
-            icon="el-icon-delete"
-            type="danger"
-            @click="templateDelete"
-            >删除模板
-          </el-button>
-        </el-row>
-      </el-tab-pane>
-      <el-tab-pane label="样式设定" name="templateStyle">
-        <el-switch
-          v-model="cardStyle.showImg"
-          active-text="显示课程图片"
-          class="zq_m_c"
-          @change="cardStyleChange"
-        >
-        </el-switch>
-      </el-tab-pane>
-    </el-tabs>
+            @change="cardStyleChange"
+          >
+          </el-switch>
+        </el-tab-pane>
+      </el-tabs>
+    </el-form>
   </div>
 </template>
 

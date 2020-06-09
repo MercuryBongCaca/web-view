@@ -248,17 +248,8 @@
                         filterable
                         placeholder="请选择"
                       >
-                        <el-option
-                          v-for="item in contractStatusList"
-                          :key="item.Code"
-                          :label="item.Name"
-                          :value="item.Code"
-                        >
-                        </el-option>
                       </el-select>
                     </el-form-item>
-                  </el-col>
-                  <el-col :span="12">
                     <el-form-item label="课程名称">
                       <el-select
                         v-model="selectPayment.courseID"
